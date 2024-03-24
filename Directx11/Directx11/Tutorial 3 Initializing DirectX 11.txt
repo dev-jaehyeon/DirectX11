@@ -1,0 +1,2 @@
+다이렉트x가 추가되면서 framework도 업데이트된다.
+ApplicationClass 밑에 D3DClass를 새로 만들어 초기화한다.
