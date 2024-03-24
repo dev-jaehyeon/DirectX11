@@ -1,0 +1,7 @@
+https://www.rastertek.com/dx11win10tut02.html
+DirectX 11을 시작하기 전에, 간단한 Code framework부터 만들 것이다. 이 프레임워크는 기본적인 윈도우로, 간단한 창 그리고 확장 가능한 프로그램을
+구축한다.
+프레임 워크는 4개의 항목으로 시작한다.
+WinMain은 어플리케이션의 시작점을 다룬다.
+SystemClass는 모든 어플리케이션을 캡슐화하고 WinMain으로부터 호출된다.
+SystemClass 안에는 InputClass와 ApplicationClass가 있다.
