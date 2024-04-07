@@ -17,6 +17,10 @@ const float SCREEN_NEAR = 0.3f;
 #include "D3DClass.h"
 #include <windows.h>
 
+//#4
+#include "cameraclass.h"
+#include "modelclass.h"
+#include "colorshaderclass.h"
 
 class ApplicationClass
 {
@@ -34,6 +38,13 @@ private:
 
 private:
 	D3DClass* m_Direct3D;
+	//#4
+	CameraClass* m_Camera;
+	ModelClass* m_Model;
+	ColorShaderClass* m_ColorShader;
 };
 
 #endif
+
+//Tutorial4:
+//ApplicationClass는 이제 3가지 클래스가 추가된다. ApplicationClass는 다른 필요한 클래스들을 사용하여 씬을 렌더링하는 메인 클래스이다.

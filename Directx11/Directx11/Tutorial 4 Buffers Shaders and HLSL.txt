@@ -1,0 +1,31 @@
+
+https://www.rastertek.com/tutdx11win10.html
+
+Vertex Buffer
+첫 번째로 이해해야할 것은 버텍스 버퍼에 대한 것이다. 3D 모델은 수많은 삼각형들로 이루어져 있다.
+각각의 삼각형은 3개의 포인트가 있고 이것이 Vertex다. 따라서 하나의 구체를 렌더링하기 위해서는 구체로부터 버텍스를 모두 가져와
+특별한 배열에 넣어야 하는데, 이것을 Vertex Buffer라고 한다. 이렇게 Vertex Buffer에 모든 버텍스 정보를 넣어따면, 그제서야 GPU로 보내서 렌더링할 수 있다.
+
+Index Buffer
+Index Buffer는 Vertex Buffer와 관련되어 있다. Index buffer는 Vertex Buffer의 Vertex들의 위치를 기록하는데 그 목적이 있다.
+GPU는 Index Buffer를 이용하여 빠르게 특정 Vertex Buffer로부터 Vertex를 찾아낸다. 컨셉은 책의 목차와 비슷하다. DirectX 문서에 의하면
+Index Buffer를 사용하는 것은  Vertex Data는 Video Memory에서 빠르게 Vertex Data의 캐싱 가능성을 높일 수 있고 이것은 퍼포먼스를 위해서라도
+권장된다.
+
+Vertex Shader
+Vertex Shader는 Vertex Buffer에서 3D 공간으로 Vertex들을 변환하기 위한 작은 프로그램이다. 각각의 Vertex에 대해 노말 등의 계산도 추가될 수 있다.
+Vertex Shader 프로그램은 처리가 필요한 각각의 Vertex에 대해 GPU에서 호출될 수 있다. 예를 들어, 5000 폴리곤 모델은 Vertex Shader 프로그램을
+15000번 매 프레임마다 실행할 것이다. 따라서 효율적인 Vertex Shader를 작성하는 것이 중요하다.
+
+Pixel Shader
+Pixel Shader는 그려지는 폴리곤의 색상을 결정하기위해 쓰이는 작은 프로그램이다. GPU에서 스크린에 보이는 모든 Pixel에 대해 실행된다.
+Coloring, Texturing, Lighting 등 폴리곤의 면에 실행되는 모든 이펙트들이 Pixel Shader에 의해 실행된다. 이 역시 많은 횟수로 실행되기 때문에
+효율적으로 작성해야 한다.
+
+HLSL
+HLSL은 DirectX에서 사용되는 셰이더를 작성하기 위한 프로그래밍 언어이다.
+
+이제 ApplicationClass 밑으로 CameraClass, ModelClass, ColorShaderClass가 새로 확장된다.
+CameraClass는 view matrix를 다룬다. 카메라의 월드상 위치를 다루고 셰이더에 정보를 보낸다.
+ModelClass는 3D모델의 지오메트리를 다룬다.
+ColorShaderClasㄴ는 HLSL을 사용하여 스크린에 모델을 렌더링하는 일을 할 것이다.

@@ -1,0 +1,19 @@
+//Pixel 셰이더는 폴리곤에 대해 스크린에 렌더링될 각각의 픽셀들을 그린다. Pixel Shader는 float4를 반환하게 되는데, 이것이 픽셀의 최종 색상이 된다.
+
+//////////////
+// TYPEDEFS //
+//////////////
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float4 color : COLOR;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Pixel Shader
+////////////////////////////////////////////////////////////////////////////////
+float4 ColorPixelShader(PixelInputType input) : SV_TARGET
+{
+    return input.color;
+}
