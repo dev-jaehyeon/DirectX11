@@ -138,6 +138,8 @@
     <ClInclude Include="Resource.h" />
     <ClInclude Include="SystemClass.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="TextureClass.h" />
+    <ClInclude Include="TextureShaderClass.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ApplicationClass.cpp" />
@@ -148,6 +150,8 @@
     <ClCompile Include="InputClass.cpp" />
     <ClCompile Include="ModelClass.cpp" />
     <ClCompile Include="SystemClass.cpp" />
+    <ClCompile Include="TextureClass.cpp" />
+    <ClCompile Include="TextureShaderClass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Directx11.rc" />
@@ -160,10 +164,13 @@
     <Text Include="Tutorial 2 Creating a Framework and Window.txt" />
     <Text Include="Tutorial 3 Initializing DirectX 11.txt" />
     <Text Include="Tutorial 4 Buffers Shaders and HLSL.txt" />
+    <Text Include="Tutorial 5 Texturing.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Color.ps" />
     <None Include="Color.vs" />
+    <None Include="Texture.ps" />
+    <None Include="Texture.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -18,9 +18,11 @@ const float SCREEN_NEAR = 0.3f;
 #include <windows.h>
 
 //#4
-#include "cameraclass.h"
-#include "modelclass.h"
-#include "colorshaderclass.h"
+#include "CameraClass.h"
+#include "ModelClass.h"
+
+//#5 ModelClass는 이제 textureShaderClass를 가진다.
+#include "TextureShaderClass.h"
 
 class ApplicationClass
 {
@@ -41,7 +43,8 @@ private:
 	//#4
 	CameraClass* m_Camera;
 	ModelClass* m_Model;
-	ColorShaderClass* m_ColorShader;
+	//#5 ColorShaderClass 는 이제 없다
+	TextureShaderClass* m_TextureShader;
 };
 
 #endif
