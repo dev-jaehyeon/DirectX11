@@ -1,0 +1,6 @@
+https://www.rastertek.com/dx11win10tut06.html
+
+6번째 튜토리얼에서는 디퓨즈 라이팅에 대해 다룬다. 여기서는 디렉셔널 라이트를 구현한다.
+앰비언트 라이팅과는 다르게 디렉셔널 라이트는 오브젝트에 직접적으로 닿지 않는다. 디렉셔널 라이트는 스팟라이트나 포인트라이트와는 다르게 방향만 알면 되고
+디버깅하기 쉽다.
+Diffuse Lighting은 vertex/pixel Shader로 구현된다. diffuse lighting은 폴리곤의 normal과 빛의 방향만 필요로 한다.

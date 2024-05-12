@@ -54,6 +54,12 @@
     <ClInclude Include="TextureClass.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="LightShaderClass.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="LightClass.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Directx11.cpp">
@@ -86,6 +92,12 @@
     <ClCompile Include="TextureClass.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="LightShaderClass.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="LightClass.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Directx11.rc">
@@ -113,6 +125,12 @@
     <Text Include="Tutorial 5 Texturing.txt">
       <Filter>소스 파일</Filter>
     </Text>
+    <Text Include="Tutorial 0 basic.txt">
+      <Filter>소스 파일</Filter>
+    </Text>
+    <Text Include="Tutorial 6 Diffuse Lighting.txt">
+      <Filter>소스 파일</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <None Include="Color.vs">
@@ -125,6 +143,12 @@
       <Filter>소스 파일</Filter>
     </None>
     <None Include="Texture.ps">
+      <Filter>소스 파일</Filter>
+    </None>
+    <None Include="Light.vs">
+      <Filter>소스 파일</Filter>
+    </None>
+    <None Include="Light.ps">
       <Filter>소스 파일</Filter>
     </None>
   </ItemGroup>

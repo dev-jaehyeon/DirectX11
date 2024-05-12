@@ -119,15 +119,21 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device)
 	//TextureClass의 추가로, 이제 vertex 배열은 color가 아닌 texture 좌표를 가진다. texture vector는 언제나 u와 v다. 
 	//첫 번째 좌표(u)는 왼쪽 아래를 의미한다. 이는 U=0.0, v=1.0을 의미한다.
 
+	//#6
+	//라이트 추가로 노말 벡터 역시 추가된다.
+
 	// Load the vertex array with data.
 	vertices[0].position = XMFLOAT3(-1.0f, -1.0f, 0.0f);  // Bottom left.
 	vertices[0].texture = XMFLOAT2(0.0f, 1.0f);
+	vertices[0].normal = XMFLOAT3(0.0f, 0.0f, -1.0f);
 
 	vertices[1].position = XMFLOAT3(0.0f, 1.0f, 0.0f);  // Top middle.
 	vertices[1].texture = XMFLOAT2(0.5f, 0.0f);
+	vertices[1].normal = XMFLOAT3(0.0f, 0.0f, -1.0f);
 
 	vertices[2].position = XMFLOAT3(1.0f, -1.0f, 0.0f);  // Bottom right.
 	vertices[2].texture = XMFLOAT2(1.0f, 1.0f);
+	vertices[2].normal = XMFLOAT3(0.0f, 0.0f, -1.0f);
 
 	// Load the index array with data.
 	indices[0] = 0;  // Bottom left.

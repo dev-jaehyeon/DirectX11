@@ -8,6 +8,10 @@ ApplicationClass::ApplicationClass()
 	m_Camera = 0;
 	m_Model = 0;
 	m_TextureShader = 0;
+
+	//#6
+	m_LightShader = 0;
+	m_Light = 0;
 }
 
 ApplicationClass::ApplicationClass(const ApplicationClass& _ApplicationClass)
@@ -57,27 +61,64 @@ bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 		return false;
 	}
 
-	// Create and initialize the texture shader object.
-	m_TextureShader = new TextureShaderClass;
+//#6
+	//// Create and initialize the texture shader object.
+	//m_TextureShader = new TextureShaderClass;
 
-	result = m_TextureShader->Initialize(m_Direct3D->GetDevice(), hwnd);
+	//result = m_TextureShader->Initialize(m_Direct3D->GetDevice(), hwnd);
+	//if (!result)
+	//{
+	//	MessageBox(hwnd, L"Could not initialize the texture shader object.", L"Error", MB_OK);
+	//	return false;
+	//}
+
+	//#6 이제 새로운 라이트 셰이더 오브젝트가 생성되고 초기화된다.
+	// Create and initialize the light shader object.
+	m_LightShader = new LightShaderClass;
+
+	result = m_LightShader->Initialize(m_Direct3D->GetDevice(), hwnd);
 	if (!result)
 	{
-		MessageBox(hwnd, L"Could not initialize the texture shader object.", L"Error", MB_OK);
+		MessageBox(hwnd, L"Could not initialize the light shader object.", L"Error", MB_OK);
 		return false;
 	}
+
+	//라이트 오브젝트는 여기서 생성된다. 라이트는 하얀색이며 z축으로 위에서 아래로 내리쬔다.
+
+		// Create and initialize the light object.
+	m_Light = new LightClass;
+
+	m_Light->SetDiffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
+	m_Light->SetDirection(0.0f, 0.0f, 1.0f);
+
 	return true;
 }
 
 void ApplicationClass::Shutdown()
 {
-	// Release the texture shader object.
-	if (m_TextureShader)
+	// Release the light object.
+	if (m_Light)
 	{
-		m_TextureShader->Shutdown();
-		delete m_TextureShader;
-		m_TextureShader = 0;
+		delete m_Light;
+		m_Light = 0;
 	}
+
+	// Release the light shader object.
+	if (m_LightShader)
+	{
+		m_LightShader->Shutdown();
+		delete m_LightShader;
+		m_LightShader = 0;
+	}
+
+	//#6
+	//// Release the texture shader object.
+	//if (m_TextureShader)
+	//{
+	//	m_TextureShader->Shutdown();
+	//	delete m_TextureShader;
+	//	m_TextureShader = 0;
+	//}
 
 	// Release the model object.
 	if (m_Model)
@@ -107,11 +148,19 @@ void ApplicationClass::Shutdown()
 
 bool ApplicationClass::Frame()
 {
+	static float rotation = 0.0f;
 	bool result;
 
 
+	// Update the rotation variable each frame.
+	rotation -= 0.0174532925f * 0.1f;
+	if (rotation < 0.0f)
+	{
+		rotation += 360.0f;
+	}
+
 	// Render the graphics scene.
-	result = Render();
+	result = Render(rotation);
 	if (!result)
 	{
 		return false;
@@ -129,7 +178,7 @@ bool ApplicationClass::Frame()
 /// 그러면 back buffer에 초록색 삼각형이 그려지게 된다. 그러면 이제 씬은 완료되었고, EndScene을 호출하여 스크린에 출력한다.
 /// </summary>
 /// <returns></returns>
-bool ApplicationClass::Render()
+bool ApplicationClass::Render(float rotation)
 {
 	XMMATRIX worldMatrix, viewMatrix, projectionMatrix;
 	bool result;
@@ -146,11 +195,19 @@ bool ApplicationClass::Render()
 	m_Camera->GetViewMatrix(viewMatrix);
 	m_Direct3D->GetProjectionMatrix(projectionMatrix);
 
+	//#6 여기서 월드 매트릭스를 회전시킨다. 그러면 삼각형을 약간 회전시킬 수 있다.
+	// Rotate the world matrix by the rotation value so that the triangle will spin.
+	worldMatrix = XMMatrixRotationY(rotation);
+
 	// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
 	m_Model->Render(m_Direct3D->GetDeviceContext());
 
-	// Render the model using the texture shader.
-	result = m_TextureShader->Render(m_Direct3D->GetDeviceContext(), m_Model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_Model->GetTexture());
+	//#6 라이트 셰이더는 여기서 삼각형을 렌더링하기 위해 호출된다. 새로운 라이트 오브젝트는 diffuse light color와 light direction을 Render Function에 보낸다.
+	//그러면 셰이더는 이들에 대한 접근 권한을 얻어낸다. 텍스처 셰이더는 없어진다.
+
+	// Render the model using the light shader.
+	result = m_LightShader->Render(m_Direct3D->GetDeviceContext(), m_Model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_Model->GetTexture(),
+		m_Light->GetDirection(), m_Light->GetDiffuseColor());
 	if (!result)
 	{
 		return false;

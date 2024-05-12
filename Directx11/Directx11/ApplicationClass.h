@@ -2,6 +2,8 @@
 #ifndef _APPLICATIONCLASS_H_
 #define _APPLICATIONCLASS_H_
 
+#include "lightshaderclass.h"
+#include "lightclass.h"
 
 /////////////
 // GLOBALS //
@@ -36,7 +38,7 @@ public:
 	bool Frame();
 
 private:
-	bool Render();
+	bool Render(float rotation);
 
 private:
 	D3DClass* m_Direct3D;
@@ -45,6 +47,10 @@ private:
 	ModelClass* m_Model;
 	//#5 ColorShaderClass 는 이제 없다
 	TextureShaderClass* m_TextureShader;
+
+	//#6
+	LightShaderClass* m_LightShader;
+	LightClass* m_Light;
 };
 
 #endif
