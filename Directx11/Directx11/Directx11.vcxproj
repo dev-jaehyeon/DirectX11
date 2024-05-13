@@ -171,6 +171,7 @@
     <Text Include="Tutorial 4 Buffers Shaders and HLSL.txt" />
     <Text Include="Tutorial 5 Texturing.txt" />
     <Text Include="Tutorial 6 Diffuse Lighting.txt" />
+    <Text Include="Tutorial 7 3D Model Rendering.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Color.ps" />

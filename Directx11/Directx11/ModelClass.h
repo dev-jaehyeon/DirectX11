@@ -7,12 +7,16 @@
 #include <d3d11.h>
 #include <directxmath.h>
 
+//#7
+#include <fstream>
+
 ///////////////////////
 // MY CLASS INCLUDES //
 ///////////////////////
 #include "textureclass.h"
 
 using namespace DirectX;
+using namespace std;
 
 class ModelClass
 {
@@ -29,6 +33,14 @@ private:
 		XMFLOAT3 normal;
 	};
 
+	//모델 포맷을 나타내는 구조체.
+	struct ModelType
+	{
+		float x, y, z;
+		float tu, tv;
+		float nx, ny, nz;
+	};
+
 public:
 	ModelClass();
 	ModelClass(const ModelClass& other);
@@ -37,7 +49,8 @@ public:
 	//이곳의 함수들은 모델의 vertex와 index buffer를 초기화 또는 종료하는 기능을 한다.
 	//Render function은 모델의 지오메트리를 비디오 카드에 놓고 color shader에 의해 그려지도록 준비한다.
 	//TextureClass가 추가되면서 deviceContext, textureFilename이 인자로 추가된다.
-	bool Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, char* textureFilename);
+	//#7 모델링을 위한 파일 패스가 추가된다.
+	bool Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, char* textureFilename, char* modelFilename);
 	void Shutdown();
 	void Render(ID3D11DeviceContext* deviceContext);
 
@@ -56,6 +69,10 @@ private:
 	bool LoadTexture(ID3D11Device*, ID3D11DeviceContext*, char*);
 	void ReleaseTexture();
 
+//#7 모델링 관련
+	bool LoadModel(char*);
+	void ReleaseModel();
+
 	//ModelClass의 private 변수는 vertex buffer와 indexbuffer 뿐만 아니라 이들의 크기를 추적한다. dx11의 버퍼는 제네릭 버퍼이며
 	//최초에 생성될 때 그 타입이 정해진다.
 private:
@@ -64,6 +81,8 @@ private:
 
 	//TextureClass가 추가되면서 로드하고 해제하고 접근할 수 있는 텍스처 리소스.
 	TextureClass* m_Texture;
+	//#7 모델링 관련
+	ModelType* m_model;
 };
 
 #endif

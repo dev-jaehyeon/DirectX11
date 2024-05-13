@@ -131,6 +131,9 @@
     <Text Include="Tutorial 6 Diffuse Lighting.txt">
       <Filter>소스 파일</Filter>
     </Text>
+    <Text Include="Tutorial 7 3D Model Rendering.txt">
+      <Filter>소스 파일</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <None Include="Color.vs">

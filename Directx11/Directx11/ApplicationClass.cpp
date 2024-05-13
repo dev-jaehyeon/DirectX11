@@ -24,6 +24,7 @@ ApplicationClass::~ApplicationClass()
 
 bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 {
+	char modelFilename[128];
 	char textureFilename[128];
 
 	bool result;
@@ -45,15 +46,17 @@ bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	// Set the initial position of the camera.
 	m_Camera->SetPosition(0.0f, 0.0f, -5.0f);
 
+	// Set the file name of the model.
+	strcpy_s(modelFilename, "../Assets/cube.txt");
+
 	// Create and initialize the model object.
 	m_Model = new ModelClass;
 
 	// Set the name of the texture file that we will be loading.
 	strcpy_s(textureFilename, "../Assets/stone01.tga");
 	m_Model->hwndTemp = hwnd;
-	result = m_Model->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), textureFilename);
+	result = m_Model->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), textureFilename, modelFilename);
 
-	//ColorShaderClass는 이제 사용되지 않음
 
 	if (!result)
 	{
@@ -192,7 +195,7 @@ bool ApplicationClass::Render(float rotation)
 
 	// Get the world, view, and projection matrices from the camera and d3d objects.
 	m_Direct3D->GetWorldMatrix(worldMatrix);
-	m_Camera->GetViewMatrix(viewMatrix);
+	m_Camera->GetViewMatrix(viewMatrix); 
 	m_Direct3D->GetProjectionMatrix(projectionMatrix);
 
 	//#6 여기서 월드 매트릭스를 회전시킨다. 그러면 삼각형을 약간 회전시킬 수 있다.
