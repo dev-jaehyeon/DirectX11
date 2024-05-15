@@ -1,0 +1,4 @@
+https://www.rastertek.com/dx11win10tut09.html
+
+이번 튜토리얼에서는 Dx11과 HLSL의 ambient lighting에 대해 다룬다. 앰비언트 라이트는 직사광이 아닌 튕겨져 나온 빛으로 인해 렌더링되는 부분이다.
+빛이 직접 닿지 않더라도 흐릿하게 보이는 것을 의미한다.
