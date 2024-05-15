@@ -172,6 +172,7 @@
     <Text Include="Tutorial 5 Texturing.txt" />
     <Text Include="Tutorial 6 Diffuse Lighting.txt" />
     <Text Include="Tutorial 7 3D Model Rendering.txt" />
+    <Text Include="Tutorial 8 Scaling Rotation Translation.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Color.ps" />

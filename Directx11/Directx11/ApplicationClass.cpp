@@ -43,8 +43,9 @@ bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	// Create the camera object.
 	m_Camera = new CameraClass;
 
+	//#8
 	// Set the initial position of the camera.
-	m_Camera->SetPosition(0.0f, 0.0f, -5.0f);
+	m_Camera->SetPosition(0.0f, 0.0f, -10.0f);
 
 	// Set the file name of the model.
 	strcpy_s(modelFilename, "../Assets/cube.txt");
@@ -183,7 +184,9 @@ bool ApplicationClass::Frame()
 /// <returns></returns>
 bool ApplicationClass::Render(float rotation)
 {
-	XMMATRIX worldMatrix, viewMatrix, projectionMatrix;
+	//XMMATRIX worldMatrix, viewMatrix, projectionMatrix;
+//#8
+	XMMATRIX worldMatrix, viewMatrix, projectionMatrix, rotateMatrix, translateMatrix, scaleMatrix, srMatrix;
 	bool result;
 
 
@@ -198,15 +201,16 @@ bool ApplicationClass::Render(float rotation)
 	m_Camera->GetViewMatrix(viewMatrix); 
 	m_Direct3D->GetProjectionMatrix(projectionMatrix);
 
-	//#6 여기서 월드 매트릭스를 회전시킨다. 그러면 삼각형을 약간 회전시킬 수 있다.
-	// Rotate the world matrix by the rotation value so that the triangle will spin.
-	worldMatrix = XMMatrixRotationY(rotation);
+	//이것이 첫 번째 트랜스폼이 된다. Y축으로 회전하는 회전행렬을 먼저 만들다. 그 다음 평행이동 행렬을 만들다. 그리고 이것은 2유닛 왼쪽으로 갈 것이다.
+	//이 두 행렬이 완성되면, SRT순서로 곱한다. 이것을 월드행렬에 넣고 이 월드 행렬을 셰이더에 보낸다.
+	rotateMatrix = XMMatrixRotationY(rotation);  // Build the rotation matrix.
+	translateMatrix = XMMatrixTranslation(-2.0f, 0.0f, 0.0f);  // Build the translation matrix.
+
+	// Multiply them together to create the final world transformation matrix.
+	worldMatrix = XMMatrixMultiply(rotateMatrix, translateMatrix);
 
 	// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
 	m_Model->Render(m_Direct3D->GetDeviceContext());
-
-	//#6 라이트 셰이더는 여기서 삼각형을 렌더링하기 위해 호출된다. 새로운 라이트 오브젝트는 diffuse light color와 light direction을 Render Function에 보낸다.
-	//그러면 셰이더는 이들에 대한 접근 권한을 얻어낸다. 텍스처 셰이더는 없어진다.
 
 	// Render the model using the light shader.
 	result = m_LightShader->Render(m_Direct3D->GetDeviceContext(), m_Model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_Model->GetTexture(),
@@ -216,6 +220,27 @@ bool ApplicationClass::Render(float rotation)
 		return false;
 	}
 
+	//두 번째 행렬은..?
+	//이번에는 스케일링이 추가된다.
+
+	scaleMatrix = XMMatrixScaling(0.5f, 0.5f, 0.5f);  // Build the scaling matrix.
+	rotateMatrix = XMMatrixRotationY(rotation);  // Build the rotation matrix.
+	translateMatrix = XMMatrixTranslation(2.0f, 0.0f, 0.0f);  // Build the translation matrix.
+
+	// Multiply the scale, rotation, and translation matrices together to create the final world transformation matrix.
+	srMatrix = XMMatrixMultiply(scaleMatrix, rotateMatrix);
+	worldMatrix = XMMatrixMultiply(srMatrix, translateMatrix);
+
+	// Put the model vertex and index buffers on the graphics pipeline to prepare them for drawing.
+	m_Model->Render(m_Direct3D->GetDeviceContext());
+
+	// Render the model using the light shader.
+	result = m_LightShader->Render(m_Direct3D->GetDeviceContext(), m_Model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_Model->GetTexture(),
+		m_Light->GetDirection(), m_Light->GetDiffuseColor());
+	if (!result)
+	{
+		return false;
+	}
 	// Present the rendered scene to the screen.
 	m_Direct3D->EndScene();
 
