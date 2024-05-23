@@ -8,6 +8,7 @@ LightShaderClass::LightShaderClass()
 	m_sampleState = 0;
 	m_matrixBuffer = 0;
 
+    m_cameraBuffer = 0;
 	//Set the new light constant buffer to null in the class constructor.
 	m_lightBuffer = 0;
 }
@@ -61,12 +62,15 @@ void LightShaderClass::Shutdown()
 }
 
 bool LightShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, XMMATRIX worldMatrix, XMMATRIX viewMatrix, XMMATRIX projectionMatrix,
-    ID3D11ShaderResourceView* texture, XMFLOAT3 lightDirection, XMFLOAT4 ambientColor, XMFLOAT4 diffuseColor)
+    ID3D11ShaderResourceView* texture, XMFLOAT3 lightDirection, XMFLOAT4 ambientColor, XMFLOAT4 diffuseColor,
+    XMFLOAT3 cameraPosition, XMFLOAT4 specularColor, float specularPower)
 {
     bool result;
 
     // Set the shader parameters that it will use for rendering.
-    result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, texture, lightDirection, ambientColor, diffuseColor);
+    //#10
+    result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, texture, lightDirection, ambientColor, diffuseColor,
+        cameraPosition, specularColor, specularPower);
     if (!result)
     {
         return false;
@@ -91,7 +95,8 @@ bool LightShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* 
     unsigned int numElements;
     D3D11_SAMPLER_DESC samplerDesc;
     D3D11_BUFFER_DESC matrixBufferDesc;
-
+    //#10
+    D3D11_BUFFER_DESC cameraBufferDesc;
     //라이트 상수 버퍼를 위해 새로운 명세를 추가한다.
     D3D11_BUFFER_DESC lightBufferDesc;
 
@@ -115,7 +120,7 @@ bool LightShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* 
         {
             MessageBox(hwnd, vsFilename, L"Missing Shader File", MB_OK);
         }
-
+       
         return false;
     }
 
@@ -133,7 +138,6 @@ bool LightShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* 
         {
             MessageBox(hwnd, psFilename, L"Missing Shader File", MB_OK);
         }
-
         return false;
     }
 
@@ -234,10 +238,27 @@ bool LightShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* 
         return false;
     }
 
+    //여기서 새로운 카메라 버퍼의 명세를 설정하고 버퍼를 생성하여 버텍스 셰이더와의 인터페이스를 구성할 수 있게 한다.
+    // Setup the description of the camera dynamic constant buffer that is in the vertex shader.
+    cameraBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+    cameraBufferDesc.ByteWidth = sizeof(CameraBufferType);
+    cameraBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    cameraBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    cameraBufferDesc.MiscFlags = 0;
+    cameraBufferDesc.StructureByteStride = 0;
+
+    // Create the camera constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+    result = device->CreateBuffer(&cameraBufferDesc, NULL, &m_cameraBuffer);
+    if (FAILED(result))
+    {
+        return false;
+    }
+
+
     //이곳에서 라이트 상수 버퍼 명세를 셋업하고 이것은 나중에 diffuse light color와 light direction을 결정한다. constant buffer의 크기를 보면,
     //그들이 16의 배수가 아니면 패딩을 넣어서 16의 배수를 만들어야 한다. 그렇지 않으면 createbuffer는 실패할 것이다.
 
-// Setup the description of the light dynamic constant buffer that is in the pixel shader.
+    // Setup the description of the light dynamic constant buffer that is in the pixel shader.
     // Note that ByteWidth always needs to be a multiple of 16 if using D3D11_BIND_CONSTANT_BUFFER or CreateBuffer will fail.
     lightBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
     lightBufferDesc.ByteWidth = sizeof(LightBufferType);
@@ -250,6 +271,7 @@ bool LightShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* 
     result = device->CreateBuffer(&lightBufferDesc, NULL, &m_lightBuffer);
     if (FAILED(result))
     {
+        MessageBox(hwnd, L"GERERERE", L"Error", MB_OK);
         return false;
     }
 
@@ -266,6 +288,14 @@ void LightShaderClass::ShutdownShader()
         m_lightBuffer->Release();
         m_lightBuffer = 0;
     }
+    
+    // Release the camera constant buffer.
+    if (m_cameraBuffer)
+    {
+        m_cameraBuffer->Release();
+        m_cameraBuffer = 0;
+    }
+
 
     // Release the matrix constant buffer.
     if (m_matrixBuffer)
@@ -342,17 +372,19 @@ void LightShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND h
 
 /// <summary>
 /// SetShaderParameter는 이제 lightDirection과 diffuseColor를 새로운 인자로 받는다
+/// #10 cameraPosition, specularColor, and specularPower도 새로 받는다
 /// </summary>
 /// <returns></returns>
 bool LightShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, XMMATRIX worldMatrix, XMMATRIX viewMatrix, XMMATRIX projectionMatrix,
-    ID3D11ShaderResourceView* texture, XMFLOAT3 lightDirection, XMFLOAT4 ambientColor, XMFLOAT4 diffuseColor)
+    ID3D11ShaderResourceView* texture, XMFLOAT3 lightDirection, XMFLOAT4 ambientColor, XMFLOAT4 diffuseColor,
+    XMFLOAT3 cameraPosition, XMFLOAT4 specularColor, float specularPower)
 {
     HRESULT result;
     D3D11_MAPPED_SUBRESOURCE mappedResource;
     unsigned int bufferNumber;
     MatrixBufferType* dataPtr;
     LightBufferType* dataPtr2;
-
+    CameraBufferType* dataPtr3;
 
     // Transpose the matrices to prepare them for the shader.
     worldMatrix = XMMatrixTranspose(worldMatrix);
@@ -383,6 +415,31 @@ bool LightShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, X
     // Now set the constant buffer in the vertex shader with the updated values.
     deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
 
+    //#10 카메라 상수 버퍼를 설정
+    // Lock the camera constant buffer so it can be written to.
+    result = deviceContext->Map(m_cameraBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+    if (FAILED(result))
+    {
+        return false;
+    }
+
+    // Get a pointer to the data in the constant buffer.
+    dataPtr3 = (CameraBufferType*)mappedResource.pData;
+
+    // Copy the camera position into the constant buffer.
+    dataPtr3->cameraPosition = cameraPosition;
+    dataPtr3->padding = 0.0f;
+
+    // Unlock the camera constant buffer.
+    deviceContext->Unmap(m_cameraBuffer, 0);
+
+    //#10 bufferNumber는 1이다. 왜냐하면 이것은 vertex shader에서 두 번째 버퍼기 때문이다.
+    // Set the position of the camera constant buffer in the vertex shader.
+    bufferNumber = 1;
+
+    // Now set the camera constant buffer in the vertex shader with the updated values.
+    deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_cameraBuffer);
+
     // Set shader texture resource in the pixel shader.
     deviceContext->PSSetShaderResources(0, 1, &texture);
 
@@ -404,7 +461,9 @@ bool LightShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, X
     dataPtr2->ambientColor = ambientColor; //#9
     dataPtr2->diffuseColor = diffuseColor;
     dataPtr2->lightDirection = lightDirection;
-    dataPtr2->padding = 0.0f;
+    dataPtr2->specularColor = specularColor;//#10
+    dataPtr2->specularPower = specularPower;
+    //dataPtr2->padding = 0.0f; //?
 
     // Unlock the constant buffer.
     deviceContext->Unmap(m_lightBuffer, 0);

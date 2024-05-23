@@ -1,0 +1,14 @@
+https://www.rastertek.com/dx11win10tut10.html
+
+이번 튜토리얼에서는 Specular Lighting에 대해 다룬다. Specular Lighting은 강조된 밝은 점을 표현할 때 쓰인다.
+Specular Lighting은 금속 표면의 빛반사를 표현할 때 사용된다. 물이 태양을 반사할 때도 쓰인다.
+공식은 
+SpecularLighting = SpecularColor * (SpecularColorOfLight * ((NormalVector dot HalfWayVector) power SpecularReflectionPower) * Attentuation * Spotlight)
+
+간단화된 공식은
+SpecularLighting = SpecularLightColor * (ViewingDirection dot ReflectionVector) power SpecularReflectionPower
+반사 벡터는 double과 light intensity를 vertex normal과 곱해집으로서 구할 수 있다.
+ReflectionVector = 2 * LightIntensity * VertexNormal - LightDirection
+
+viewing direction은 아래와 같다.
+ViewingDirection = CameraPosition - VertexPosition

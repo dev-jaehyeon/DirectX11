@@ -18,6 +18,9 @@ cbuffer LightBuffer
     float4 diffuseColor;
     float3 lightDirection;
     float padding;
+    //#10 Specular Color를 위해 LightBuffer 업데이트
+    float specularPower;
+    float4 specularColor;
 };
 
 
@@ -29,6 +32,8 @@ struct PixelInputType
     float4 position : SV_POSITION;
     float2 tex : TEXCOORD0;
     float3 normal : NORMAL;
+    //#10 마찬가지로 Vertex Shader에서 넘어오는 정보를 위해 추가됨
+    float3 viewDirection : TEXCOORD1;
 };
 
 
@@ -41,7 +46,9 @@ float4 LightPixelShader(PixelInputType input) : SV_TARGET
     float3 lightDir;
     float lightIntensity;
     float4 color;
-
+    //#10
+    float3 reflection;
+    float4 specular;
 
     // Sample the pixel color from the texture using the sampler at this texture coordinate location.
     textureColor = shaderTexture.Sample(SampleType, input.tex);
@@ -51,8 +58,11 @@ float4 LightPixelShader(PixelInputType input) : SV_TARGET
     // Set the default output color to the ambient light value for all pixels.
     color = ambientColor;
 
-//This is where the lighting equation that was discussed earlier is now implemented.
-//The light intensity value is calculated as the dot product between the normal vector of triangle and the light direction vector.
+    // Initialize the specular color.
+    specular = float4(0.0f, 0.0f, 0.0f, 0.0f);
+
+    //This is where the lighting equation that was discussed earlier is now implemented.
+    //The light intensity value is calculated as the dot product between the normal vector of triangle and the light direction vector.
 
     // Invert the light direction for calculations.
     lightDir = -lightDirection;
@@ -61,11 +71,21 @@ float4 LightPixelShader(PixelInputType input) : SV_TARGET
     lightIntensity = saturate(dot(input.normal, lightDir));
 
     //#9 N dot L이 노말과 라이트의 내적이 0보다 큼을 체크한다. 그러면 diffuse color에 ambient color를 더한다. 그렇지 않다면 더할 필요가 없다.
-    //0보다 낮다면 굳이 빛을 계산할 필요가 없다
+    //0보다 낮다면 굳이 빛을 계산할 필요가 없다.
     if(lightIntensity > 0.0f)
     {
         // Determine the final diffuse color based on the diffuse color and the amount of light intensity.
         color += (diffuseColor * lightIntensity);
+
+        // Saturate the ambient and diffuse color.
+        color = saturate(color);
+
+        //#10 Specular light를 위한 reflection vector는 여기서 계산된다. 물론 light intensity가 0보다 클 때만 작동한다.
+        // Calculate the reflection vector based on the light intensity, normal vector, and light direction.
+        reflection = normalize(2.0f * lightIntensity * input.normal - lightDir); 
+        //#10 specular light의 양은 reflection vector와 viewing direction으로 계산된다. 보는 자와 라이트소스의 각도가 낮을수록 specular light의 양은 더 커진다.
+        // Determine the amount of specular light based on the reflection vector, viewing direction, and specular power.
+        specular = pow(saturate(dot(reflection, input.viewDirection)), specularPower);
     }
 
 //And finally, the diffuse value of the light is combined with the texture pixel value to produce the color result.
@@ -76,6 +96,10 @@ float4 LightPixelShader(PixelInputType input) : SV_TARGET
 
     // Multiply the texture pixel and the final diffuse color to get the final pixel color result.
     color = color * textureColor;
+
+    //#10
+    // Add the specular component last to the output color.
+    color = saturate(color + specular);
 
     return color;
 }

@@ -140,6 +140,9 @@
     <Text Include="Tutorial 9 Ambient Lighting.txt">
       <Filter>소스 파일</Filter>
     </Text>
+    <Text Include="Tutorial 10 Specular Lighting.txt">
+      <Filter>소스 파일</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <None Include="Color.vs">

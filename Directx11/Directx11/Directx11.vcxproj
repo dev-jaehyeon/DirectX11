@@ -166,6 +166,7 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="Tutorial 0 basic.txt" />
+    <Text Include="Tutorial 10 Specular Lighting.txt" />
     <Text Include="Tutorial 2 Creating a Framework and Window.txt" />
     <Text Include="Tutorial 3 Initializing DirectX 11.txt" />
     <Text Include="Tutorial 4 Buffers Shaders and HLSL.txt" />
