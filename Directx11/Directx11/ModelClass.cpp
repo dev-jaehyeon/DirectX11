@@ -4,9 +4,8 @@ ModelClass::ModelClass()
 {
 	m_vertexBuffer = 0;
 	m_indexBuffer = 0;
-
-	//TextureClass 추가로 인한 변경
-	m_Texture = 0;
+	m_Textures = 0;
+	m_model = 0;
 }
 
 ModelClass::ModelClass(const ModelClass& other)
@@ -17,7 +16,7 @@ ModelClass::~ModelClass()
 {
 }
 
-bool ModelClass::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, char* textureFilename, char* modelFilename)
+bool ModelClass::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, char* modelFilename, char* textureFilename1, char* textureFilename2)
 {
 	bool result;
 
@@ -29,7 +28,6 @@ bool ModelClass::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceCon
 		return false;
 	}
 
-
 	// Initialize the vertex and index buffers.
 	result = InitializeBuffers(device);
 	if (!result)
@@ -37,10 +35,8 @@ bool ModelClass::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceCon
 		return false;
 	}
 
-	//텍스처를 로드하는 새로운 함수 호출
-	// 
-	// Load the texture for this model.
-	result = LoadTexture(device, deviceContext, textureFilename);
+	// Load the textures for this model.
+	result = LoadTextures(device, deviceContext, textureFilename1, textureFilename2);
 	if (!result)
 	{
 		return false;
@@ -51,9 +47,8 @@ bool ModelClass::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceCon
 
 void ModelClass::Shutdown()
 {
-	//TextureClass가 추가되면서 추가됨
-	// Release the model texture.
-	ReleaseTexture();
+	// Release the model textures.
+	ReleaseTextures();
 
 	// Shutdown the vertex and index buffers.
 	ShutdownBuffers();
@@ -86,9 +81,9 @@ int ModelClass::GetIndexCount()
 	return m_indexCount;
 }
 
-ID3D11ShaderResourceView* ModelClass::GetTexture()
+ID3D11ShaderResourceView* ModelClass::GetTexture(int index)
 {
-	return m_Texture->GetTexture();
+	return m_Textures[index].GetTexture();
 }
 
 /// <summary>
@@ -100,7 +95,9 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device)
 	unsigned long* indices;
 	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
 	D3D11_SUBRESOURCE_DATA vertexData, indexData;
-	HRESULT result;	
+	HRESULT result;
+	int i;
+
 
 	// Create the vertex array.
 	vertices = new VertexType[m_vertexCount];
@@ -108,9 +105,8 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device)
 	// Create the index array.
 	indices = new unsigned long[m_indexCount];
 
-	//#7 더 이상 수동으로 버텍스와 인덱스를 채우지 않는다. 불러온 모델에서 채운다.
-	   // Load the vertex array and index array with data.
-	for (int i = 0; i < m_vertexCount; i++)
+	// Load the vertex array and index array with data.
+	for (i = 0; i < m_vertexCount; i++)
 	{
 		vertices[i].position = XMFLOAT3(m_model[i].x, m_model[i].y, m_model[i].z);
 		vertices[i].texture = XMFLOAT2(m_model[i].tu, m_model[i].tv);
@@ -118,11 +114,6 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device)
 
 		indices[i] = i;
 	}
-
-	//채워진 vertex 배열과 index 배열로 이제 vertex buffer와 index buffer를 만들 수 있다. 둘은 같은 프로세스로 만들어진다.
-	//먼저, 버퍼의 명세를 채운다. 명세에서 ByteWidth와 BindFlags는 정확히 채워졌는지 확인할 필요가 있다. 명세가 채워진 다음에는
-	//subresource 포인터를 채워야한다. 이것은 이전에 만들어놨던 vertex와 index 배열을 가리킨다. 명세와 subresurce 포인터로 CreateBuffer를
-	//D3D device에서 호출하면 새로운 버퍼에 대한 포인터를 반환할 것이다.
 
 	// Set up the description of the static vertex buffer.
 	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -163,8 +154,6 @@ bool ModelClass::InitializeBuffers(ID3D11Device* device)
 	{
 		return false;
 	}
-
-	//vertex buffer와 index buffer를 생성한 다음에는 vertex와 index 배열을 지운다. 이미 버퍼로 카피되었기 때문이다.
 
 	// Release the arrays now that the vertex and index buffers have been created and loaded.
 	delete[] vertices;
@@ -226,14 +215,21 @@ void ModelClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
 	return;
 }
 
-bool ModelClass::LoadTexture(ID3D11Device* device, ID3D11DeviceContext* deviceContext, char* filename)
+bool ModelClass::LoadTextures(ID3D11Device* device, ID3D11DeviceContext* deviceContext, char* filename1, char* filename2)
 {
 	bool result;
 
-	// Create and initialize the texture object.
-	m_Texture = new TextureClass;
-	m_Texture->hwndTemp = hwndTemp;
-	result = m_Texture->Initialize(device, deviceContext, filename);
+
+	// Create and initialize the texture object array.
+	m_Textures = new TextureClass[2];
+
+	result = m_Textures[0].Initialize(device, deviceContext, filename1);
+	if (!result)
+	{
+		return false;
+	}
+
+	result = m_Textures[1].Initialize(device, deviceContext, filename2);
 	if (!result)
 	{
 		return false;
@@ -242,14 +238,16 @@ bool ModelClass::LoadTexture(ID3D11Device* device, ID3D11DeviceContext* deviceCo
 	return true;
 }
 
-void ModelClass::ReleaseTexture()
+void ModelClass::ReleaseTextures()
 {
-	// Release the texture object.
-	if (m_Texture)
+	// Release the texture object array.
+	if (m_Textures)
 	{
-		m_Texture->Shutdown();
-		delete m_Texture;
-		m_Texture = 0;
+		m_Textures[0].Shutdown();
+		m_Textures[1].Shutdown();
+
+		delete[] m_Textures;
+		m_Textures = 0;
 	}
 
 	return;
@@ -263,6 +261,7 @@ bool ModelClass::LoadModel(char* filename)
 	ifstream fin;
 	char input;
 	int i;
+
 
 	// Open the model file.
 	fin.open(filename);

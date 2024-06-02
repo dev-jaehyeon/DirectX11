@@ -1,45 +1,21 @@
 #include "SystemClass.h"
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
-{
-	switch (umessage)
-	{
-		// Check if the window is being destroyed.
-	case WM_DESTROY:
-	{
-		PostQuitMessage(0);
-		return 0;
-	}
-
-	// Check if the window is being closed.
-	case WM_CLOSE:
-	{
-		PostQuitMessage(0);
-		return 0;
-	}
-
-	// All other messages pass to the message handler in the system class.
-	default:
-	{
-		return ApplicationHandle->MessageHandler(hwnd, umessage, wparam, lparam);
-	}
-	}
-}
-
-
 SystemClass::SystemClass()
 {
 	m_Input = 0;
 	m_Application = 0;
 }
 
-SystemClass::SystemClass(const SystemClass& _SystemClass)
+
+SystemClass::SystemClass(const SystemClass& other)
 {
 }
+
 
 SystemClass::~SystemClass()
 {
 }
+
 
 bool SystemClass::Initialize()
 {
@@ -57,7 +33,11 @@ bool SystemClass::Initialize()
 	// Create and initialize the input object.  This object will be used to handle reading the keyboard input from the user.
 	m_Input = new InputClass;
 
-	m_Input->Initialize();
+	result = m_Input->Initialize(m_hinstance, m_hwnd, screenWidth, screenHeight);
+	if (!result)
+	{
+		return false;
+	}
 
 	// Create and initialize the application class object.  This object will handle rendering all the graphics for this application.
 	m_Application = new ApplicationClass;
@@ -70,6 +50,7 @@ bool SystemClass::Initialize()
 
 	return true;
 }
+
 
 void SystemClass::Shutdown()
 {
@@ -94,16 +75,12 @@ void SystemClass::Shutdown()
 	return;
 }
 
-/// sudo code:
-/// while (not done)
-/// 1. 윈도우시스템 메시지 체크
-/// 2. 시스템 메시지 처리
-/// 3. 어플리케이션 루프 처리
-/// 4. 사용자가 Frame Processing 도중 종료를 원하는지 체크
+
 void SystemClass::Run()
 {
 	MSG msg;
 	bool done, result;
+
 
 	// Initialize the message structure.
 	ZeroMemory(&msg, sizeof(MSG));
@@ -134,61 +111,25 @@ void SystemClass::Run()
 			}
 		}
 	}
+
 	return;
 }
 
-/// <summary>
-/// MessageHandler는 직접적으로 윈도우 시스템의 메시지를 다루는 곳이다. 현재는 인풋 정도를 받아서 쓴다.
-/// </summary>
-/// <param name="hwnd"></param>
-/// <param name="umsg"></param>
-/// <param name="wparam"></param>
-/// <param name="lparam"></param>
-/// <returns></returns>
-LRESULT SystemClass::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
-{
-	switch (umsg)
-	{
-		// Check if a key has been pressed on the keyboard.
-	case WM_KEYDOWN:
-	{
-		// If a key is pressed send it to the input object so it can record that state.
-		m_Input->KeyDown((unsigned int)wparam);
-		return 0;
-	}
 
-	// Check if a key has been released on the keyboard.
-	case WM_KEYUP:
-	{
-		// If a key is released then send it to the input object so it can unset the state for that key.
-		m_Input->KeyUp((unsigned int)wparam);
-		return 0;
-	}
-
-	// Any other messages send to the default message handler as our application won't make use of them.
-	default:
-	{
-		return DefWindowProc(hwnd, umsg, wparam, lparam);
-	}
-	}
-}
-
-/// <summary>
-/// Frame 함수는 모든 어플리케이션의 처리가 다 끝난 지점이다. 이곳에서 인풋을 체크하고 만약 눌렀으면 거기에 맞는 처리를 한다.
-/// </summary>
-/// <returns></returns>
 bool SystemClass::Frame()
 {
 	bool result;
 
-	// Check if the user pressed escape and wants to exit the application.
-	if (m_Input->IsKeyDown(VK_ESCAPE))
+
+	// Do the input frame processing.
+	result = m_Input->Frame();
+	if (!result)
 	{
 		return false;
 	}
 
 	// Do the frame processing for the application class object.
-	result = m_Application->Frame();
+	result = m_Application->Frame(m_Input);
 	if (!result)
 	{
 		return false;
@@ -197,13 +138,13 @@ bool SystemClass::Frame()
 	return true;
 }
 
-/// <summary>
-/// 이 함수는 렌더링할 윈도우 창 함수를 빌드하는 코드를 쓰는 곳이다. screenWidth와 screenHeight를 반환하는데, 이들을 application에서 사용할 것이다.
-/// 윈도우를 default 세팅으로 초기화하고 경계 없이 초기화한다. 글로벌 세팅인 FULL_SCREEN에 따라 풀사이즈나 윈도우사이즈로 초기화한다.
-/// 
-/// </summary>
-/// <param name="screenWidth"></param>
-/// <param name="screenHeight"></param>
+
+LRESULT CALLBACK SystemClass::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
+{
+	return DefWindowProc(hwnd, umsg, wparam, lparam);
+}
+
+
 void SystemClass::InitializeWindows(int& screenWidth, int& screenHeight)
 {
 	WNDCLASSEX wc;
@@ -285,6 +226,7 @@ void SystemClass::InitializeWindows(int& screenWidth, int& screenHeight)
 	return;
 }
 
+
 void SystemClass::ShutdownWindows()
 {
 	// Show the mouse cursor.
@@ -310,3 +252,29 @@ void SystemClass::ShutdownWindows()
 	return;
 }
 
+
+LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
+{
+	switch (umessage)
+	{
+		// Check if the window is being destroyed.
+	case WM_DESTROY:
+	{
+		PostQuitMessage(0);
+		return 0;
+	}
+
+	// Check if the window is being closed.
+	case WM_CLOSE:
+	{
+		PostQuitMessage(0);
+		return 0;
+	}
+
+	// All other messages pass to the message handler in the system class.
+	default:
+	{
+		return ApplicationHandle->MessageHandler(hwnd, umessage, wparam, lparam);
+	}
+	}
+}

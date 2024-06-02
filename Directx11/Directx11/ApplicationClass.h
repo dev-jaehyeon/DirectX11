@@ -18,39 +18,30 @@ const float SCREEN_NEAR = 0.3f;
 ///////////////////////
 #include "D3DClass.h"
 #include <windows.h>
-
-//#4
 #include "CameraClass.h"
 #include "ModelClass.h"
-
-//#5 ModelClass는 이제 textureShaderClass를 가진다.
-#include "TextureShaderClass.h"
+#include "MultiTextureShaderClass.h"
+#include "InputClass.h"
 
 class ApplicationClass
 {
 public:
 	ApplicationClass();
-	ApplicationClass(const ApplicationClass& _ApplicationClass);
+	ApplicationClass(const ApplicationClass&);
 	~ApplicationClass();
 
-	bool Initialize(int screenWidth, int screenHeight, HWND hwnd);
+	bool Initialize(int, int, HWND);
 	void Shutdown();
-	bool Frame();
+	bool Frame(InputClass*);
 
 private:
-	bool Render(float rotation);
+	bool Render();
 
 private:
 	D3DClass* m_Direct3D;
-	//#4
 	CameraClass* m_Camera;
+	MultiTextureShaderClass* m_MultiTextureShader;
 	ModelClass* m_Model;
-	//#5 ColorShaderClass 는 이제 없다
-	TextureShaderClass* m_TextureShader;
-
-	//#6
-	LightShaderClass* m_LightShader;
-	LightClass* m_Light;
 };
 
 #endif

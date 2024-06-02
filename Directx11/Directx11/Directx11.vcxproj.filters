@@ -60,6 +60,9 @@
     <ClInclude Include="LightClass.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="MultiTextureShaderClass.h">
+      <Filter>소스 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Directx11.cpp">
@@ -96,6 +99,9 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="LightClass.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="MultiTextureShaderClass.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
@@ -161,6 +167,12 @@
       <Filter>소스 파일</Filter>
     </None>
     <None Include="Light.ps">
+      <Filter>소스 파일</Filter>
+    </None>
+    <None Include="MultiTexture.vs">
+      <Filter>소스 파일</Filter>
+    </None>
+    <None Include="MultiTexture.ps">
       <Filter>소스 파일</Filter>
     </None>
   </ItemGroup>
