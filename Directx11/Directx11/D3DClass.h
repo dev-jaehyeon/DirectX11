@@ -20,8 +20,9 @@
 //////////////
 #include <d3d11.h>
 #include <directxmath.h>
+#include <wrl.h> // ComPtr
 using namespace DirectX;
-
+using Microsoft::WRL::ComPtr;
 //원래 view matrix 변수가 있어야하지만 카메라에 넣기로 함
 class D3DClass
 {
@@ -52,8 +53,8 @@ private:
     bool m_vsync_enabled;
     int m_videoCardMemory;
     char m_videoCardDescription[128];
-    IDXGISwapChain* m_swapChain;
-    ID3D11Device* m_device;
+    ComPtr<IDXGISwapChain> m_swapChain;
+    ComPtr<ID3D11Device> m_device;
     ID3D11DeviceContext* m_deviceContext;
     ID3D11RenderTargetView* m_renderTargetView;
     ID3D11Texture2D* m_depthStencilBuffer;

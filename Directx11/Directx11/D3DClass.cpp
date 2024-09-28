@@ -3,8 +3,8 @@
 
 D3DClass::D3DClass()
 {
-	m_swapChain = 0;
-	m_device = 0;
+	m_swapChain = nullptr;
+	m_device = nullptr;
 	m_deviceContext = 0;
 	m_renderTargetView = 0;
 	m_depthStencilBuffer = 0;
@@ -262,7 +262,7 @@ bool D3DClass::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hw
 
 	// Create the swap chain, Direct3D device, and Direct3D device context.
 	result = D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, 0, &featureLevel, 1,
-		D3D11_SDK_VERSION, &swapChainDesc, &m_swapChain, &m_device, NULL, &m_deviceContext);
+		D3D11_SDK_VERSION, &swapChainDesc, &m_swapChain, m_device.GetAddressOf(), NULL, &m_deviceContext);
 	if (FAILED(result))
 	{
 		return false;
@@ -501,14 +501,14 @@ void D3DClass::Shutdown()
 
 	if (m_device)
 	{
-		m_device->Release();
-		m_device = 0;
+		m_device.Reset();
+		m_device = nullptr;
 	}
 
 	if (m_swapChain)
 	{
-		m_swapChain->Release();
-		m_swapChain = 0;
+		m_swapChain.Reset();
+		m_swapChain = nullptr;
 	}
 
 	return;
@@ -558,7 +558,7 @@ void D3DClass::EndScene()
 
 ID3D11Device* D3DClass::GetDevice()
 {
-	return m_device;
+	return m_device.Get();
 }
 
 ID3D11DeviceContext* D3DClass::GetDeviceContext()
