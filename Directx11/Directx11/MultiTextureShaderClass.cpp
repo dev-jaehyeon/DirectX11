@@ -45,7 +45,7 @@ bool MultiTextureShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
 	{
 		return false;
 	}
-
+	
 	// Initialize the vertex and pixel shaders.
 	result = InitializeShader(device, hwnd, vsFilename, psFilename);
 	if(!result)

@@ -42,15 +42,15 @@ bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	m_Camera->SetPosition(0.0f, 0.0f, -5.0f);
 	m_Camera->Render();
 
-	// Create and initialize the multitexture shader object.
-	m_MultiTextureShader = new MultiTextureShaderClass;
+	//// Create and initialize the multitexture shader object.
+	//m_MultiTextureShader = new MultiTextureShaderClass;
 
-	result = m_MultiTextureShader->Initialize(m_Direct3D->GetDevice(), hwnd);
-	if (!result)
-	{
-		MessageBox(hwnd, L"Could not initialize the multitexture shader object.", L"Error", MB_OK);
-		return false;
-	}
+	//result = m_MultiTextureShader->Initialize(m_Direct3D->GetDevice(), hwnd);
+	//if (!result)
+	//{
+	//	MessageBox(hwnd, L"Could not initialize the multitexture shader object.", L"Error", MB_OK);
+	//	return false;
+	//}
 
 	// Set the file name of the model.
 	strcpy_s(modelFilename, "../Assets/square.txt");
@@ -60,9 +60,9 @@ bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	strcpy_s(textureFilename2, "../Assets/dirt01.tga");
 
 	// Create and initialize the model object.
-	m_Model = new ModelClass;
+	m_Model2 = new ModelClass2();
 
-	result = m_Model->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), modelFilename, textureFilename1, textureFilename2);
+	result = m_Model2->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), modelFilename);
 	if (!result)
 	{
 		return false;
@@ -134,7 +134,7 @@ bool ApplicationClass::Frame(InputClass* Input)
 bool ApplicationClass::Render()
 {
 	XMMATRIX worldMatrix, viewMatrix, projectionMatrix;
-	bool result;
+	bool result = true;
 
 
 	// Clear the buffers to begin the scene.
@@ -146,10 +146,10 @@ bool ApplicationClass::Render()
 	m_Direct3D->GetProjectionMatrix(projectionMatrix);
 
 	// Render the mouse text strings using the font shader.
-	m_Model->Render(m_Direct3D->GetDeviceContext());
+	m_Model2->Render(m_Direct3D->GetDeviceContext());
 
-	result = m_MultiTextureShader->Render(m_Direct3D->GetDeviceContext(), m_Model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,
-		m_Model->GetTexture(0), m_Model->GetTexture(1));
+	/*result = m_MultiTextureShader->Render(m_Direct3D->GetDeviceContext(), m_Model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,
+		m_Model->GetTexture(0), m_Model->GetTexture(1));*/
 	if (!result)
 	{
 		return false;
