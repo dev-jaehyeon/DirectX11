@@ -24,6 +24,7 @@ const float SCREEN_NEAR = 0.3f;
 #include "InputClass.h"
 
 #include "ModelClass2.h"
+#include "TextureShaderClass.h"
 
 class ApplicationClass
 {
@@ -37,7 +38,7 @@ public:
 	bool Frame(InputClass*);
 
 private:
-	bool Render();
+	bool Render(HWND hwnd);
 
 private:
 	D3DClass* m_Direct3D;
@@ -45,6 +46,9 @@ private:
 	MultiTextureShaderClass* m_MultiTextureShader;
 	ModelClass* m_Model;
 	ModelClass2* m_Model2;
+	TextureShaderClass* m_TextureShader;
+	TextureClass* m_Texture;
+	HWND m_hwnd;
 };
 
 #endif

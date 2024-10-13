@@ -13,6 +13,9 @@
 #include <d3d11.h>
 #include <stdio.h>
 
+#include "WICTextureLoader.h"
+
+using namespace DirectX;
 
 class TextureClass
 {
@@ -30,13 +33,16 @@ public:
 	TextureClass(const TextureClass&);
 	~TextureClass();
 
-	bool Initialize(ID3D11Device*, ID3D11DeviceContext*, char*);
+	bool InitializeTarga(ID3D11Device*, ID3D11DeviceContext*, char*);
+	bool InitializeWIC(ID3D11Device* _device, ID3D11DeviceContext* _context, const wchar_t* _filename);
 	void Shutdown();
 
 	ID3D11ShaderResourceView* GetTexture();
 
 	int GetWidth();
 	int GetHeight();
+
+	void InitHWND(HWND hwnd);
 
 private:
 	bool LoadTarga32Bit(char*);
@@ -46,7 +52,7 @@ private:
 	ID3D11Texture2D* m_texture;
 	ID3D11ShaderResourceView* m_textureView;
 	int m_width, m_height;
-
+	HWND m_hwnd;
 };
 
 #endif

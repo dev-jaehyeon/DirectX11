@@ -18,7 +18,7 @@ TextureClass::~TextureClass()
 }
 
 
-bool TextureClass::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, char* filename)
+bool TextureClass::InitializeTarga(ID3D11Device* device, ID3D11DeviceContext* deviceContext, char* filename)
 {
 	bool result;
 	D3D11_TEXTURE2D_DESC textureDesc;
@@ -80,6 +80,20 @@ bool TextureClass::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceC
 	delete[] m_targaData;
 	m_targaData = 0;
 
+	return true;
+}
+
+bool TextureClass::InitializeWIC(ID3D11Device* _device, ID3D11DeviceContext* _context, const wchar_t* _filename)
+{
+	ID3D11Resource* resource;
+	ID3D11ShaderResourceView* shaderResourceView;
+	HRESULT hResult = CreateWICTextureFromFile(_device, _filename, &resource, &shaderResourceView);
+	
+	if (FAILED(hResult))
+	{
+		MessageBox(m_hwnd, L"Texture FAiled", L"Error", MB_OK);
+		return false;
+	}
 	return true;
 }
 
@@ -216,4 +230,9 @@ int TextureClass::GetWidth()
 int TextureClass::GetHeight()
 {
 	return m_height;
+}
+
+void TextureClass::InitHWND(HWND hwnd)
+{
+	m_hwnd = hwnd;
 }

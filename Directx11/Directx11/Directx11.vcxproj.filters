@@ -66,6 +66,9 @@
     <ClInclude Include="ModelClass2.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="MaterialClass.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Directx11.cpp">
@@ -108,6 +111,9 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="ModelClass2.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="MaterialClass.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

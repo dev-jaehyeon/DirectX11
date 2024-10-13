@@ -223,13 +223,13 @@ bool ModelClass::LoadTextures(ID3D11Device* device, ID3D11DeviceContext* deviceC
 	// Create and initialize the texture object array.
 	m_Textures = new TextureClass[2];
 
-	result = m_Textures[0].Initialize(device, deviceContext, filename1);
+	result = m_Textures[0].InitializeTarga(device, deviceContext, filename1);
 	if (!result)
 	{
 		return false;
 	}
 
-	result = m_Textures[1].Initialize(device, deviceContext, filename2);
+	result = m_Textures[1].InitializeTarga(device, deviceContext, filename2);
 	if (!result)
 	{
 		return false;

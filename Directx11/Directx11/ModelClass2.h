@@ -30,7 +30,9 @@ public:
 	bool InitializeBuffers(ID3D11Device* _device);
 	void Shutdown();
 	void Render(ID3D11DeviceContext* _deviceContext);
+	void RenderBuffers(ID3D11DeviceContext* _deviceContext);
 
+	int GetIndexCount();
 private:
 	bool LoadMesh(char* _fileName);
 	void ReleaseMesh();

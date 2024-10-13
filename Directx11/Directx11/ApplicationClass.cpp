@@ -7,6 +7,8 @@ ApplicationClass::ApplicationClass()
 	m_Camera = 0;
 	m_MultiTextureShader = 0;
 	m_Model = 0;
+	m_TextureShader = 0;
+	m_Texture = 0;
 }
 
 
@@ -24,7 +26,7 @@ bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 {
 	char modelFilename[128], textureFilename1[128], textureFilename2[128];
 	bool result;
-
+	m_hwnd = hwnd;
 
 	// Create and initialize the Direct3D object.
 	m_Direct3D = new D3DClass;
@@ -59,12 +61,34 @@ bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	strcpy_s(textureFilename1, "../Assets/stone01.tga");
 	strcpy_s(textureFilename2, "../Assets/dirt01.tga");
 
+	const wchar_t* textureFilename3 = L"../Assets/Magnus.png";
+
 	// Create and initialize the model object.
 	m_Model2 = new ModelClass2();
-
 	result = m_Model2->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), modelFilename);
+
 	if (!result)
 	{
+		MessageBox(hwnd, L"Model FAiled", L"Error", MB_OK);
+		return false;
+	}
+
+	m_Texture = new TextureClass();
+	m_Texture->InitHWND(m_hwnd);
+	result = m_Texture->InitializeWIC(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), textureFilename3);
+
+	if (!result)
+	{
+		MessageBox(hwnd, L"Texture FAiled", L"Error", MB_OK);
+		return false;
+	}
+
+	m_TextureShader = new TextureShaderClass();
+	result = m_TextureShader->Initialize(m_Direct3D->GetDevice(), hwnd);
+
+	if (!result)
+	{
+		MessageBox(hwnd, L"Shader FAiled", L"Error", MB_OK);
 		return false;
 	}
 
@@ -121,7 +145,7 @@ bool ApplicationClass::Frame(InputClass* Input)
 	}
 
 	// Render the graphics scene.
-	result = Render();
+	result = Render(m_hwnd);
 	if (!result)
 	{
 		return false;
@@ -131,7 +155,7 @@ bool ApplicationClass::Frame(InputClass* Input)
 }
 
 
-bool ApplicationClass::Render()
+bool ApplicationClass::Render(HWND hwnd)
 {
 	XMMATRIX worldMatrix, viewMatrix, projectionMatrix;
 	bool result = true;
@@ -148,10 +172,12 @@ bool ApplicationClass::Render()
 	// Render the mouse text strings using the font shader.
 	m_Model2->Render(m_Direct3D->GetDeviceContext());
 
+	result = m_TextureShader->Render(m_Direct3D->GetDeviceContext(), m_Model2->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_Texture->GetTexture());
 	/*result = m_MultiTextureShader->Render(m_Direct3D->GetDeviceContext(), m_Model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,
 		m_Model->GetTexture(0), m_Model->GetTexture(1));*/
 	if (!result)
 	{
+		MessageBox(hwnd, L"Render Failed", L"Error", MB_OK);
 		return false;
 	}
 
