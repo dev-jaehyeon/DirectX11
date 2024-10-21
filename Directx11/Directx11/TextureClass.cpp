@@ -86,8 +86,7 @@ bool TextureClass::InitializeTarga(ID3D11Device* device, ID3D11DeviceContext* de
 bool TextureClass::InitializeWIC(ID3D11Device* _device, ID3D11DeviceContext* _context, const wchar_t* _filename)
 {
 	ID3D11Resource* resource;
-	ID3D11ShaderResourceView* shaderResourceView;
-	HRESULT hResult = CreateWICTextureFromFile(_device, _filename, &resource, &shaderResourceView);
+	HRESULT hResult = CreateWICTextureFromFile(_device, _filename, &resource, &m_textureView);
 	
 	if (FAILED(hResult))
 	{
