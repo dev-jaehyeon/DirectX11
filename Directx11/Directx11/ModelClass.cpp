@@ -4,7 +4,6 @@ ModelClass::ModelClass()
 {
 	m_vertexBuffer = 0;
 	m_indexBuffer = 0;
-	m_Textures = 0;
 	m_model = 0;
 }
 
@@ -16,7 +15,7 @@ ModelClass::~ModelClass()
 {
 }
 
-bool ModelClass::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, char* modelFilename, char* textureFilename1, char* textureFilename2)
+bool ModelClass::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceContext, char* modelFilename)
 {
 	bool result;
 
@@ -35,21 +34,18 @@ bool ModelClass::Initialize(ID3D11Device* device, ID3D11DeviceContext* deviceCon
 		return false;
 	}
 
-	// Load the textures for this model.
-	result = LoadTextures(device, deviceContext, textureFilename1, textureFilename2);
-	if (!result)
-	{
-		return false;
-	}
+	//// Load the textures for this model.
+	//result = LoadTextures(device, deviceContext, textureFilename1, textureFilename2);
+	//if (!result)
+	//{
+	//	return false;
+	//}
 
 	return true;
 }
 
 void ModelClass::Shutdown()
 {
-	// Release the model textures.
-	ReleaseTextures();
-
 	// Shutdown the vertex and index buffers.
 	ShutdownBuffers();
 
@@ -79,11 +75,6 @@ void ModelClass::Render(ID3D11DeviceContext* deviceContext)
 int ModelClass::GetIndexCount()
 {
 	return m_indexCount;
-}
-
-ID3D11ShaderResourceView* ModelClass::GetTexture(int index)
-{
-	return m_Textures[index].GetTexture();
 }
 
 /// <summary>
@@ -211,44 +202,6 @@ void ModelClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
 
 	// Set the type of primitive that should be rendered from this vertex buffer, in this case triangles.
 	deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	return;
-}
-
-bool ModelClass::LoadTextures(ID3D11Device* device, ID3D11DeviceContext* deviceContext, char* filename1, char* filename2)
-{
-	bool result;
-
-
-	// Create and initialize the texture object array.
-	m_Textures = new TextureClass[2];
-
-	result = m_Textures[0].InitializeTarga(device, deviceContext, filename1);
-	if (!result)
-	{
-		return false;
-	}
-
-	result = m_Textures[1].InitializeTarga(device, deviceContext, filename2);
-	if (!result)
-	{
-		return false;
-	}
-
-	return true;
-}
-
-void ModelClass::ReleaseTextures()
-{
-	// Release the texture object array.
-	if (m_Textures)
-	{
-		m_Textures[0].Shutdown();
-		m_Textures[1].Shutdown();
-
-		delete[] m_Textures;
-		m_Textures = 0;
-	}
 
 	return;
 }

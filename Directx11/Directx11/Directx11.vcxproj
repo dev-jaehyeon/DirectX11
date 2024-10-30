@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -141,6 +141,7 @@
     <ClInclude Include="ModelClass2.h" />
     <ClInclude Include="MultiTextureShaderClass.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="ShaderClass.h" />
     <ClInclude Include="SystemClass.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TextureClass.h" />
@@ -159,6 +160,7 @@
     <ClCompile Include="ModelClass.cpp" />
     <ClCompile Include="ModelClass2.cpp" />
     <ClCompile Include="MultiTextureShaderClass.cpp" />
+    <ClCompile Include="ShaderClass.cpp" />
     <ClCompile Include="SystemClass.cpp" />
     <ClCompile Include="TextureClass.cpp" />
     <ClCompile Include="TextureShaderClass.cpp" />

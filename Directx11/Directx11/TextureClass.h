@@ -34,7 +34,7 @@ public:
 	~TextureClass();
 
 	bool InitializeTarga(ID3D11Device*, ID3D11DeviceContext*, char*);
-	bool InitializeWIC(ID3D11Device* _device, ID3D11DeviceContext* _context, const wchar_t* _filename);
+	bool InitializeWIC(ID3D11Device* _device, const wchar_t* _filename);
 	void Shutdown();
 
 	ID3D11ShaderResourceView* GetTexture();

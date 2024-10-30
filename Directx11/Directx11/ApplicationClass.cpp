@@ -9,6 +9,7 @@ ApplicationClass::ApplicationClass()
 	m_Model = 0;
 	m_TextureShader = 0;
 	m_Texture = 0;
+	m_Shader = 0;
 }
 
 
@@ -53,8 +54,6 @@ bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	//	MessageBox(hwnd, L"Could not initialize the multitexture shader object.", L"Error", MB_OK);
 	//	return false;
 	//}
-	m_MultiTextureShader = new MultiTextureShaderClass();
-	result = m_MultiTextureShader->Initialize(m_Direct3D->GetDevice(), hwnd);
 
 	m_TextureShader = new TextureShaderClass();
 	result = m_TextureShader->Initialize(m_Direct3D->GetDevice(), hwnd);
@@ -66,30 +65,22 @@ bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	strcpy_s(textureFilename2, "../Assets/dirt01.tga");
 
 	const wchar_t* textureFilename3 = L"../Assets/Magnus.png";
+	m_Shader = new ShaderClass();
+	m_Shader->InitializeTextureShader(m_Direct3D->GetDevice(), hwnd, textureFilename3);
 
 	// Create and initialize the model object.
 	//m_Model2 = new ModelClass2();
 	//result = m_Model2->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), modelFilename);
 
 	m_Model = new ModelClass();
-	result = m_Model->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), modelFilename, textureFilename1, textureFilename2);
+	result = m_Model->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), modelFilename);
 	m_Texture = new TextureClass();
-	//m_Texture->InitializeTarga(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), textureFilename1);
-	m_Texture->InitializeWIC(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), textureFilename3);
+	m_Texture->InitializeWIC(m_Direct3D->GetDevice(), textureFilename3);
 	if (!result)
 	{
 		MessageBox(hwnd, L"Model FAiled", L"Error", MB_OK);
 		return false;
 	}
-
-
-
-	if (!result)
-	{
-		MessageBox(hwnd, L"Shader FAiled", L"Error", MB_OK);
-		return false;
-	}
-
 	return true;
 }
 
@@ -125,6 +116,13 @@ void ApplicationClass::Shutdown()
 		m_Direct3D->Shutdown();
 		delete m_Direct3D;
 		m_Direct3D = 0;
+	}
+
+	if (m_Shader)
+	{
+		m_Shader->Shutdown();
+		delete m_Shader;
+		m_Shader = 0;
 	}
 
 	return;
@@ -170,10 +168,11 @@ bool ApplicationClass::Render(HWND hwnd)
 	// Render the mouse text strings using the font shader.
 	m_Model->Render(m_Direct3D->GetDeviceContext());
 
-	result = m_TextureShader->Render(m_Direct3D->GetDeviceContext(), m_Model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_Texture->GetTexture());
+	//result = m_TextureShader->Render(m_Direct3D->GetDeviceContext(), m_Model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_Texture->GetTexture());
 	/*result = m_MultiTextureShader->Render(m_Direct3D->GetDeviceContext(), m_Model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix,
 		m_Model->GetTexture(0), m_Model->GetTexture(1));*/
 	//result = m_MultiTextureShader->Render(m_Direct3D->GetDeviceContext(), m_Model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix, m_Model->GetTexture(0), m_Model->GetTexture(1));
+	result = m_Shader->Render(m_Direct3D->GetDeviceContext(), m_Model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix);
 	if (!result)
 	{
 		MessageBox(hwnd, L"Render Failed", L"Error", MB_OK);

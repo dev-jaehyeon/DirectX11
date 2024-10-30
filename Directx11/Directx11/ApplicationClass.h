@@ -25,6 +25,7 @@ const float SCREEN_NEAR = 0.3f;
 
 #include "ModelClass2.h"
 #include "TextureShaderClass.h"
+#include "ShaderClass.h"
 
 class ApplicationClass
 {
@@ -49,6 +50,8 @@ private:
 	TextureShaderClass* m_TextureShader;
 	TextureClass* m_Texture;
 	HWND m_hwnd;
+
+	ShaderClass* m_Shader;
 };
 
 #endif
