@@ -11,6 +11,7 @@ class ShaderClass
 private:
 	enum ShaderType
 	{
+		ShaderToy,
 		Texture,
 		MultiTexture
 	};
@@ -21,10 +22,21 @@ private:
 		XMMATRIX projection;
 	};
 
+	struct ShaderToyConstantBuffer
+	{
+		float dx;
+		float dy;
+		float threshold;
+		float strength;
+		float iTime;
+		float dummy[3];
+	};
+
 public:
 	ShaderClass();
 	~ShaderClass();
 	bool InitializeTextureShader(ID3D11Device* _device, HWND _hwnd, const wchar_t* _texFilename);
+	bool InitializeShaderToyShader(ID3D11Device* _device, HWND _hwnd);
 
 	void Shutdown();
 	/*bool Render(ID3D11DeviceContext* deviceContext, int indexCount, XMMATRIX worldMatrix, XMMATRIX viewMatrix,
@@ -39,6 +51,7 @@ private:
 
 	bool SetTextureShaderParameters(ID3D11DeviceContext* deviceContext, XMMATRIX worldMatrix, XMMATRIX viewMatrix,
 		XMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture);
+	bool SetShaderToyParameters(ID3D11DeviceContext* deviceContext, XMMATRIX worldMatrix, XMMATRIX viewMatrix, XMMATRIX projectionMatrix);
 	void RenderShader(ID3D11DeviceContext* deviceContext, int indexCount);
 
 private:

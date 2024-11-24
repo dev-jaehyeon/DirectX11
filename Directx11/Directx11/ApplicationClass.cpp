@@ -42,7 +42,7 @@ bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	// Create and initialize the camera object.
 	m_Camera = new CameraClass;
 
-	m_Camera->SetPosition(0.0f, 0.0f, -5.0f);
+	m_Camera->SetPosition(0.0f, 0.0f, -3.0f);
 	m_Camera->Render();
 
 	//// Create and initialize the multitexture shader object.
@@ -66,16 +66,20 @@ bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 
 	const wchar_t* textureFilename3 = L"../Assets/Magnus.png";
 	m_Shader = new ShaderClass();
-	m_Shader->InitializeTextureShader(m_Direct3D->GetDevice(), hwnd, textureFilename3);
-
+	result = m_Shader->InitializeShaderToyShader(m_Direct3D->GetDevice(), hwnd);
+	if (!result)
+	{
+		MessageBox(hwnd, L"Initialize ShaderToy FAiled", L"Error", MB_OK);
+		return false;
+	}
 	// Create and initialize the model object.
 	//m_Model2 = new ModelClass2();
 	//result = m_Model2->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), modelFilename);
 
 	m_Model = new ModelClass();
 	result = m_Model->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), modelFilename);
-	m_Texture = new TextureClass();
-	m_Texture->InitializeWIC(m_Direct3D->GetDevice(), textureFilename3);
+	//m_Texture = new TextureClass();
+	//m_Texture->InitializeWIC(m_Direct3D->GetDevice(), textureFilename3);
 	if (!result)
 	{
 		MessageBox(hwnd, L"Model FAiled", L"Error", MB_OK);

@@ -194,6 +194,13 @@
     <None Include="packages.config" />
     <None Include="Texture.ps" />
     <None Include="Texture.vs" />
+    <None Include="VS_ShaderToy.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="PS_Seascape.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+    </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
