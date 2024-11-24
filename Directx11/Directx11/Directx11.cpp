@@ -4,6 +4,8 @@
 #include "framework.h"
 #include "Directx11.h"
 #include "SystemClass.h"
+#include "stdio.h"
+#include <iostream>
 #define MAX_LOADSTRING 100
 
 // 전역 변수:
@@ -29,6 +31,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     // Create the system object.
     System = new SystemClass;
 
+    AllocConsole();
+    freopen("CONOUT$", "wt", stdout);
+    //CONOUT$ - console 창
+    //wt - 텍스트 쓰기 모드
+    //stdout - 출력될 파일 포인터(모니터로 지정)
+
+출처: https://kukuta.tistory.com/142 [HardCore in Programming:티스토리]
     // Initialize and run the system object.
     result = System->Initialize();
     if (result)

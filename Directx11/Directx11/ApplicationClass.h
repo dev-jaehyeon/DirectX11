@@ -2,9 +2,6 @@
 #ifndef _APPLICATIONCLASS_H_
 #define _APPLICATIONCLASS_H_
 
-#include "lightshaderclass.h"
-#include "lightclass.h"
-
 /////////////
 // GLOBALS //
 /////////////
@@ -20,12 +17,12 @@ const float SCREEN_NEAR = 0.3f;
 #include <windows.h>
 #include "CameraClass.h"
 #include "ModelClass.h"
-#include "MultiTextureShaderClass.h"
 #include "InputClass.h"
 
-#include "ModelClass2.h"
 #include "TextureShaderClass.h"
 #include "ShaderClass.h"
+
+
 
 class ApplicationClass
 {
@@ -44,9 +41,8 @@ private:
 private:
 	D3DClass* m_Direct3D;
 	CameraClass* m_Camera;
-	MultiTextureShaderClass* m_MultiTextureShader;
+	//MultiTextureShaderClass* m_MultiTextureShader;
 	ModelClass* m_Model;
-	ModelClass2* m_Model2;
 	TextureShaderClass* m_TextureShader;
 	TextureClass* m_Texture;
 	HWND m_hwnd;

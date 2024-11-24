@@ -1,5 +1,6 @@
 #include "ShaderClass.h"
 #include "TextureClass.h"
+#include <iostream>
 
 ShaderClass::ShaderClass()
 {
@@ -311,6 +312,28 @@ bool ShaderClass::InitializeShaderToyShader(ID3D11Device* _device, HWND _hwnd)
 		return false;
 	}
 
+	//Constant Buffer 만드는 부분
+	D3D11_BUFFER_DESC cbDesc;
+	cbDesc.ByteWidth = sizeof(cBufferData);
+	cbDesc.Usage = D3D11_USAGE_DYNAMIC;
+	cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	cbDesc.MiscFlags = 0;
+	cbDesc.StructureByteStride = 0;
+
+	// Fill in the subresource data.
+	D3D11_SUBRESOURCE_DATA initData;
+	initData.pSysMem = &cBufferData;
+	initData.SysMemPitch = 0;
+	initData.SysMemSlicePitch = 0;
+
+	auto hr = _device->CreateBuffer(&cbDesc, &initData,
+		cBuffer_ShToyPS.GetAddressOf());
+	if (FAILED(hr)) {
+		return false;
+
+	}
+
 	return true;
 }
 
@@ -372,9 +395,12 @@ bool ShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, XMM
 	}
 	else if (shaderType == ShaderType::ShaderToy)
 	{
-		result = SetShaderToyParameters(deviceContext);
+		result = SetShaderToyParameters(deviceContext, cBuffer_ShToyPS);
 		if (result == false)
+		{
+			MessageBox(hwnd, L"FUckdc", L"Failed Creating VertexShader", MB_OK);
 			return false;
+		}
 	}
 
 	RenderShader(deviceContext, indexCount);
@@ -425,13 +451,20 @@ bool ShaderClass::SetTextureShaderParameters(ID3D11DeviceContext* deviceContext,
 	return true;
 }
 
-bool ShaderClass::SetShaderToyParameters(ID3D11DeviceContext* deviceContext)
+bool ShaderClass::SetShaderToyParameters(ID3D11DeviceContext* deviceContext, ComPtr<ID3D11Buffer>& buffer)
 {
 	//HRESULT result;
 	//D3D11_MAPPED_SUBRESOURCE mappedResource;
 	//MatrixBufferType* dataPtr;
 	//unsigned int bufferNumber;
 
+	cBufferData.iTime += 0.016f;
+	//std::cout << "iTime: " << cBufferData.iTime << std::endl;
+
+	D3D11_MAPPED_SUBRESOURCE ms;
+	deviceContext->Map(buffer.Get(), NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);
+	memcpy(ms.pData, &cBufferData, sizeof(cBufferData));
+	deviceContext->Unmap(buffer.Get(), NULL);
 
 	
 	return true;
@@ -446,8 +479,10 @@ void ShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int indexCoun
 	deviceContext->VSSetShader(m_vertexShader, NULL, 0);
 	deviceContext->PSSetShader(m_pixelShader, NULL, 0);
 
+	deviceContext->PSSetConstantBuffers(0, 1, cBuffer_ShToyPS.GetAddressOf());
 	// Set the sampler state in the pixel shader.
 	deviceContext->PSSetSamplers(0, 1, &m_sampleState);
+
 
 	// Render the triangle.
 	deviceContext->DrawIndexed(indexCount, 0, 0);

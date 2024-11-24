@@ -5,7 +5,7 @@ ApplicationClass::ApplicationClass()
 {
 	m_Direct3D = 0;
 	m_Camera = 0;
-	m_MultiTextureShader = 0;
+	//m_MultiTextureShader = 0;
 	m_Model = 0;
 	m_TextureShader = 0;
 	m_Texture = 0;
@@ -73,8 +73,6 @@ bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 		return false;
 	}
 	// Create and initialize the model object.
-	//m_Model2 = new ModelClass2();
-	//result = m_Model2->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), modelFilename);
 
 	m_Model = new ModelClass();
 	result = m_Model->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(), modelFilename);
@@ -99,13 +97,13 @@ void ApplicationClass::Shutdown()
 		m_Model = 0;
 	}
 
-	// Release the multitexture shader object.
-	if (m_MultiTextureShader)
-	{
-		m_MultiTextureShader->Shutdown();
-		delete m_MultiTextureShader;
-		m_MultiTextureShader = 0;
-	}
+	//// Release the multitexture shader object.
+	//if (m_MultiTextureShader)
+	//{
+	//	m_MultiTextureShader->Shutdown();
+	//	delete m_MultiTextureShader;
+	//	m_MultiTextureShader = 0;
+	//}
 
 	// Release the camera object.
 	if (m_Camera)

@@ -3,6 +3,11 @@
 #include <d3dcompiler.h>
 #include <directxmath.h>
 #include <fstream>
+
+#include <windows.h>
+#include <wrl.h>
+
+using Microsoft::WRL::ComPtr;
 using namespace DirectX;
 using namespace std;
 
@@ -51,7 +56,8 @@ private:
 
 	bool SetTextureShaderParameters(ID3D11DeviceContext* deviceContext, XMMATRIX worldMatrix, XMMATRIX viewMatrix,
 		XMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture);
-	bool SetShaderToyParameters(ID3D11DeviceContext* deviceContext);
+
+	bool SetShaderToyParameters(ID3D11DeviceContext* deviceContext, ComPtr<ID3D11Buffer>& buffer);
 	void RenderShader(ID3D11DeviceContext* deviceContext, int indexCount);
 
 private:
@@ -66,5 +72,8 @@ private:
 	HWND hwnd;
 	ShaderType shaderType;
 	class TextureClass* textures;
+
+	ShaderToyConstantBuffer cBufferData;
+	ComPtr<ID3D11Buffer> cBuffer_ShToyPS;
 };
 
