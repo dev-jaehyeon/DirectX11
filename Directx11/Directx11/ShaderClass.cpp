@@ -198,7 +198,6 @@ bool ShaderClass::InitializeShaderToyShader(ID3D11Device* _device, HWND _hwnd)
 	ID3D10Blob* pixelShaderBuffer;
 	D3D11_INPUT_ELEMENT_DESC polygonLayout[2];
 	unsigned int numElements;
-	D3D11_BUFFER_DESC matrixBufferDesc;
 
 	//텍스처 샘플러를 위한 새로운 변수
 	D3D11_SAMPLER_DESC samplerDesc;
@@ -284,20 +283,6 @@ bool ShaderClass::InitializeShaderToyShader(ID3D11Device* _device, HWND _hwnd)
 	pixelShaderBuffer->Release();
 	pixelShaderBuffer = 0;
 
-	// Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
-	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
-	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	matrixBufferDesc.MiscFlags = 0;
-	matrixBufferDesc.StructureByteStride = 0;
-
-	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
-	result = _device->CreateBuffer(&matrixBufferDesc, NULL, &m_matrixBuffer);
-	if (FAILED(result))
-	{
-		return false;
-	}
 
 	//Sampler State 명세는 여기서 셋업된다. 그리고 셰이더 파일로 넘어간다. Texture Sampler에서 가장 중요한 명세는 Filter다.
 	//Filter는 폴리곤의 면에 그려지는 최종 텍스처를 만들기 위해 조합되거나 사용되는 픽셀들을 결정한다.
@@ -387,7 +372,7 @@ bool ShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, XMM
 	}
 	else if (shaderType == ShaderType::ShaderToy)
 	{
-		result = SetShaderToyParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix);
+		result = SetShaderToyParameters(deviceContext);
 		if (result == false)
 			return false;
 	}
@@ -440,46 +425,15 @@ bool ShaderClass::SetTextureShaderParameters(ID3D11DeviceContext* deviceContext,
 	return true;
 }
 
-bool ShaderClass::SetShaderToyParameters(ID3D11DeviceContext* deviceContext, XMMATRIX worldMatrix, XMMATRIX viewMatrix, XMMATRIX projectionMatrix)
+bool ShaderClass::SetShaderToyParameters(ID3D11DeviceContext* deviceContext)
 {
-	HRESULT result;
-	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	MatrixBufferType* dataPtr;
-	unsigned int bufferNumber;
+	//HRESULT result;
+	//D3D11_MAPPED_SUBRESOURCE mappedResource;
+	//MatrixBufferType* dataPtr;
+	//unsigned int bufferNumber;
 
 
-	// Transpose the matrices to prepare them for the shader.
-	worldMatrix = XMMatrixTranspose(worldMatrix);
-	viewMatrix = XMMatrixTranspose(viewMatrix);
-	projectionMatrix = XMMatrixTranspose(projectionMatrix);
-
-	// Lock the constant buffer so it can be written to.
-	result = deviceContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
-	if (FAILED(result))
-	{
-		return false;
-	}
-
-	// Get a pointer to the data in the constant buffer.
-	dataPtr = (MatrixBufferType*)mappedResource.pData;
-
-	// Copy the matrices into the constant buffer.
-	dataPtr->world = worldMatrix;
-	dataPtr->view = viewMatrix;
-	dataPtr->projection = projectionMatrix;
-
-	// Unlock the constant buffer.
-	deviceContext->Unmap(m_matrixBuffer, 0);
-
-	// Set the position of the constant buffer in the vertex shader.
-	bufferNumber = 0;
-
-	// Finally set the constant buffer in the vertex shader with the updated values.
-	deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
-
-	// Set shader texture resources in the pixel shader.
-	//deviceContext->PSSetShaderResources(0, 1, &texture);
-
+	
 	return true;
 }
 

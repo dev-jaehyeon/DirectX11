@@ -51,7 +51,7 @@ private:
 
 	bool SetTextureShaderParameters(ID3D11DeviceContext* deviceContext, XMMATRIX worldMatrix, XMMATRIX viewMatrix,
 		XMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture);
-	bool SetShaderToyParameters(ID3D11DeviceContext* deviceContext, XMMATRIX worldMatrix, XMMATRIX viewMatrix, XMMATRIX projectionMatrix);
+	bool SetShaderToyParameters(ID3D11DeviceContext* deviceContext);
 	void RenderShader(ID3D11DeviceContext* deviceContext, int indexCount);
 
 private:
