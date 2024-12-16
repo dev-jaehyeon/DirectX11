@@ -18,7 +18,8 @@ private:
 	{
 		ShaderToy,
 		Texture,
-		MultiTexture
+		MultiTexture,
+		ShaderToyTexture
 	};
 	struct MatrixBufferType
 	{
@@ -42,6 +43,7 @@ public:
 	~ShaderClass();
 	bool InitializeTextureShader(ID3D11Device* _device, HWND _hwnd, const wchar_t* _texFilename);
 	bool InitializeShaderToyShader(ID3D11Device* _device, HWND _hwnd);
+	bool InitializeShaderToyTextureShader(ID3D11Device* _device, HWND _hwnd, const wchar_t* _psFilename, const wchar_t** _texFilenames, int _texNum);
 
 	void Shutdown();
 	/*bool Render(ID3D11DeviceContext* deviceContext, int indexCount, XMMATRIX worldMatrix, XMMATRIX viewMatrix,
@@ -58,6 +60,8 @@ private:
 		XMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture);
 
 	bool SetShaderToyParameters(ID3D11DeviceContext* deviceContext, ComPtr<ID3D11Buffer>& buffer);
+	bool SetShaderToyTextureParameters(ID3D11DeviceContext* deviceContext, ComPtr<ID3D11Buffer>& buffer, ID3D11ShaderResourceView** textures, int _texNum);
+
 	void RenderShader(ID3D11DeviceContext* deviceContext, int indexCount);
 
 private:
@@ -75,5 +79,7 @@ private:
 
 	ShaderToyConstantBuffer cBufferData;
 	ComPtr<ID3D11Buffer> cBuffer_ShToyPS;
+
+	int texNum;
 };
 

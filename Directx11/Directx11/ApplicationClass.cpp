@@ -65,8 +65,13 @@ bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	strcpy_s(textureFilename2, "../Assets/dirt01.tga");
 
 	const wchar_t* textureFilename3 = L"../Assets/Magnus.png";
+	const wchar_t* textureFilename4 = L"../Assets/Magnus.png";
+	const wchar_t* textureFilenames[] = {L"../Assets/Magnus.png",  L"../Assets/dirt01.tga"};
+
 	m_Shader = new ShaderClass();
-	result = m_Shader->InitializeShaderToyShader(m_Direct3D->GetDevice(), hwnd);
+	//result = m_Shader->InitializeShaderToyShader(m_Direct3D->GetDevice(), hwnd);
+	result = m_Shader->InitializeShaderToyTextureShader(m_Direct3D->GetDevice(), hwnd, L"PS_Seascape.hlsl", textureFilenames, 2);
+
 	if (!result)
 	{
 		MessageBox(hwnd, L"Initialize ShaderToy FAiled", L"Error", MB_OK);

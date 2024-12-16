@@ -337,6 +337,168 @@ bool ShaderClass::InitializeShaderToyShader(ID3D11Device* _device, HWND _hwnd)
 	return true;
 }
 
+bool ShaderClass::InitializeShaderToyTextureShader(ID3D11Device* _device, HWND _hwnd, const wchar_t* _psFilename, const wchar_t** _texFilenames, int _texNum)
+{
+	textures = new TextureClass[_texNum];
+	texNum = _texNum;
+	for (int i = 0; i < _texNum; i++)
+	{
+		textures[i].InitializeWIC(_device, _texFilenames[i]);
+	}
+
+	shaderType = ShaderType::ShaderToy;
+	hwnd = _hwnd;
+
+	const wchar_t* vsFilenamec = L"VS_ShaderToy.hlsl";
+	const wchar_t* psFilenamec = L"PS_Seascape.hlsl";
+	WCHAR* vsFilename = const_cast<wchar_t*>(vsFilenamec);
+	WCHAR* psFilename = const_cast<wchar_t*>(psFilenamec);
+	
+	HRESULT result;
+	ID3D10Blob* errorMessage;
+	ID3D10Blob* vertexShaderBuffer;
+	ID3D10Blob* pixelShaderBuffer;
+	D3D11_INPUT_ELEMENT_DESC polygonLayout[2];
+	unsigned int numElements;
+	D3D11_BUFFER_DESC matrixBufferDesc;
+
+	//텍스처 샘플러를 위한 새로운 변수
+	D3D11_SAMPLER_DESC samplerDesc;
+
+	// Initialize the pointers this function will use to null.
+	errorMessage = 0;
+	vertexShaderBuffer = 0;
+	pixelShaderBuffer = 0;
+
+	//새로운 텍스처 vertex shader와 pixel shader
+	// Compile the vertex shader code.
+	result = D3DCompileFromFile(vsFilename, NULL, NULL, "main", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
+		&vertexShaderBuffer, &errorMessage);
+	if (FAILED(result))
+	{
+		MessageBox(hwnd, vsFilename, L"Missing Shader File", MB_OK);
+		return false;
+	}
+
+	// Compile the pixel shader code.
+	result = D3DCompileFromFile(psFilename, NULL, NULL, "main", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
+		&pixelShaderBuffer, &errorMessage);
+	if (FAILED(result))
+	{
+		MessageBox(hwnd, psFilename, L"Missing Shader File", MB_OK);
+		return false;
+	}
+
+	// Create the vertex shader from the buffer.
+	result = _device->CreateVertexShader(vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), NULL, &m_vertexShader);
+	if (FAILED(result))
+	{
+		MessageBox(hwnd, psFilename, L"Failed Creating VertexShader", MB_OK);
+		return false;
+	}
+
+	// Create the pixel shader from the buffer.
+	result = _device->CreatePixelShader(pixelShaderBuffer->GetBufferPointer(), pixelShaderBuffer->GetBufferSize(), NULL, &m_pixelShader);
+	if (FAILED(result))
+	{
+		MessageBox(hwnd, psFilename, L"Failed Creating Pixel Shader", MB_OK);
+		return false;
+	}
+
+	//Input Layout이 변경된다. 이제 컬러 대신 텍스처 요소를 사용한다. 첫 번째 인자는 바뀌지 않지만 SemanticName과 두 번째 인자의 포맷이 TEXCOORD, DXGI_FORMAT_R32G32_FLOAT
+	//으로 바뀐다. 이 두 변화는 새로운 ModelCalss와 셰이더 파일의 VertexType과 맞물린다. 
+
+	// Create the vertex input layout description.
+	// This setup needs to match the VertexType stucture in the ModelClass and in the shader.
+	polygonLayout[0].SemanticName = "POSITION";
+	polygonLayout[0].SemanticIndex = 0;
+	polygonLayout[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygonLayout[0].InputSlot = 0;
+	polygonLayout[0].AlignedByteOffset = 0;
+	polygonLayout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[0].InstanceDataStepRate = 0;
+
+	polygonLayout[1].SemanticName = "TEXCOORD";
+	polygonLayout[1].SemanticIndex = 0;
+	polygonLayout[1].Format = DXGI_FORMAT_R32G32_FLOAT;
+	polygonLayout[1].InputSlot = 0;
+	polygonLayout[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygonLayout[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	polygonLayout[1].InstanceDataStepRate = 0;
+
+	// Get a count of the elements in the layout.
+	numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
+
+	// Create the vertex input layout.
+	result = _device->CreateInputLayout(polygonLayout, numElements, vertexShaderBuffer->GetBufferPointer(),
+		vertexShaderBuffer->GetBufferSize(), &m_layout);
+	if (FAILED(result))
+	{
+
+		MessageBox(hwnd, L"Failed to Create Input Layout", L"Failed Creating InputLayout", MB_OK);
+		return false;
+	}
+
+	// Release the vertex shader buffer and pixel shader buffer since they are no longer needed.
+	vertexShaderBuffer->Release();
+	vertexShaderBuffer = 0;
+
+	pixelShaderBuffer->Release();
+	pixelShaderBuffer = 0;
+
+
+	//Sampler State 명세는 여기서 셋업된다. 그리고 셰이더 파일로 넘어간다. Texture Sampler에서 가장 중요한 명세는 Filter다.
+	//Filter는 폴리곤의 면에 그려지는 최종 텍스처를 만들기 위해 조합되거나 사용되는 픽셀들을 결정한다.
+	//이 예시에서는 D3D11_FILTER_MIN_MAG_MIP_LINEAR를 사용하는데, 비싸지만 좋은 결과물을 가져다준다.
+	//이것은 Sampler가 축소 및 확대 그리고 밉 레벨 샘플링을 위해 선형보간하도록 한다.
+	//Address U와 AddressV는 좌표가 0과 1 사이에 있도록 보증한다. 그 너머에 있다면 0과 1 사이로 놓이게 된다. 다른 세팅은 모두 기본값이다.
+	// Create a texture sampler state description.
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	samplerDesc.MipLODBias = 0.0f;
+	samplerDesc.MaxAnisotropy = 1;
+	samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	samplerDesc.BorderColor[0] = 0;
+	samplerDesc.BorderColor[1] = 0;
+	samplerDesc.BorderColor[2] = 0;
+	samplerDesc.BorderColor[3] = 0;
+	samplerDesc.MinLOD = 0;
+	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	// Create the texture sampler state.
+	result = _device->CreateSamplerState(&samplerDesc, &m_sampleState);
+	if (FAILED(result))
+	{
+		return false;
+	}
+
+	//Constant Buffer 만드는 부분
+	D3D11_BUFFER_DESC cbDesc;
+	cbDesc.ByteWidth = sizeof(cBufferData);
+	cbDesc.Usage = D3D11_USAGE_DYNAMIC;
+	cbDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	cbDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	cbDesc.MiscFlags = 0;
+	cbDesc.StructureByteStride = 0;
+
+	// Fill in the subresource data.
+	D3D11_SUBRESOURCE_DATA initData;
+	initData.pSysMem = &cBufferData;
+	initData.SysMemPitch = 0;
+	initData.SysMemSlicePitch = 0;
+
+	auto hr = _device->CreateBuffer(&cbDesc, &initData,
+		cBuffer_ShToyPS.GetAddressOf());
+	if (FAILED(hr)) {
+		return false;
+
+	}
+
+	return true;
+}
+
 void ShaderClass::Shutdown()
 {
 	ShutdownShader();
@@ -402,13 +564,29 @@ bool ShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, XMM
 			return false;
 		}
 	}
+	else if (shaderType == ShaderType::ShaderToyTexture)
+	{
+		ID3D11ShaderResourceView** textureViews = new ID3D11ShaderResourceView * [texNum];
+		for (int i = 0; i < texNum; i++)
+		{
+			textureViews[i] = textures[i].GetTexture();
+		}
+
+		result = SetShaderToyTextureParameters(deviceContext, cBuffer_ShToyPS, textureViews, texNum);
+		if (result == false)
+		{
+			MessageBox(hwnd, L"FUckdc", L"Failed SetShaderToyPArameterTexture", MB_OK);
+			return false;
+		}
+	}
 
 	RenderShader(deviceContext, indexCount);
 	return true;
 }
 
 
-bool ShaderClass::SetTextureShaderParameters(ID3D11DeviceContext* deviceContext, XMMATRIX worldMatrix, XMMATRIX viewMatrix, XMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
+bool ShaderClass::SetTextureShaderParameters(ID3D11DeviceContext* deviceContext,
+	XMMATRIX worldMatrix, XMMATRIX viewMatrix, XMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
 {
 	HRESULT result;
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
@@ -467,6 +645,24 @@ bool ShaderClass::SetShaderToyParameters(ID3D11DeviceContext* deviceContext, Com
 	deviceContext->Unmap(buffer.Get(), NULL);
 
 	
+	return true;
+}
+
+bool ShaderClass::SetShaderToyTextureParameters(ID3D11DeviceContext* deviceContext, ComPtr<ID3D11Buffer>& buffer, ID3D11ShaderResourceView** textures, int _texNum)
+{
+	cBufferData.iTime += 0.016f;
+	//std::cout << "iTime: " << cBufferData.iTime << std::endl;
+
+	D3D11_MAPPED_SUBRESOURCE ms;
+	deviceContext->Map(buffer.Get(), NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);
+	memcpy(ms.pData, &cBufferData, sizeof(cBufferData));
+	deviceContext->Unmap(buffer.Get(), NULL);
+
+	for (int i = 0; i < _texNum; i++)
+	{
+		deviceContext->PSSetShaderResources(i, 1, &textures[i]);
+	}
+
 	return true;
 }
 
