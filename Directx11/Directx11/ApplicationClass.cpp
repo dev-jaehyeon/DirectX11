@@ -55,8 +55,8 @@ bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	//	return false;
 	//}
 
-	m_TextureShader = new TextureShaderClass();
-	result = m_TextureShader->Initialize(m_Direct3D->GetDevice(), hwnd);
+	//m_TextureShader = new TextureShaderClass();
+	//result = m_TextureShader->Initialize(m_Direct3D->GetDevice(), hwnd);
 	// Set the file name of the model.
 	strcpy_s(modelFilename, "../Assets/square.txt");
 
@@ -65,12 +65,14 @@ bool ApplicationClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	strcpy_s(textureFilename2, "../Assets/dirt01.tga");
 
 	const wchar_t* textureFilename3 = L"../Assets/Magnus.png";
-	const wchar_t* textureFilename4 = L"../Assets/Magnus.png";
-	const wchar_t* textureFilenames[] = {L"../Assets/Magnus.png",  L"../Assets/dirt01.tga"};
+	const wchar_t* textureFilename4 = L"../Assets/noise01.png";
+	const wchar_t* textureFilenames[] = { L"../Assets/Magnus.png" };
 
 	m_Shader = new ShaderClass();
-	//result = m_Shader->InitializeShaderToyShader(m_Direct3D->GetDevice(), hwnd);
-	result = m_Shader->InitializeShaderToyTextureShader(m_Direct3D->GetDevice(), hwnd, L"PS_Seascape.hlsl", textureFilenames, 2);
+	result = m_Shader->InitializeShaderToyShader(m_Direct3D->GetDevice(), hwnd);
+	//result = m_Shader->InitializeShaderToyTextureShader(m_Direct3D->GetDevice(), hwnd, L"PS_HellCloud.hlsl", textureFilenames, 1);
+	//result = m_Shader->InitializeTextureShader(m_Direct3D->GetDevice(), hwnd, textureFilename4);
+	//result = m_Shader->TEST_InitSToyOneTextureShader(m_Direct3D->GetDevice(), hwnd, L"PS_HellCloud.hlsl", textureFilename4);
 
 	if (!result)
 	{

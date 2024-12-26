@@ -172,7 +172,7 @@
     <None Include="Texture.vs">
       <Filter>소스 파일</Filter>
     </None>
-    <None Include="Texture.ps">
+    <None Include="Texture.hlsl">
       <Filter>소스 파일</Filter>
     </None>
     <None Include="Light.vs">
@@ -194,6 +194,18 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="PS_Seascape.hlsl">
+      <Filter>소스 파일</Filter>
+    </FxCompile>
+    <FxCompile Include="PS_HellCloud.hlsl">
+      <Filter>소스 파일</Filter>
+    </FxCompile>
+    <FxCompile Include="PS_ProteanCloud.hlsl">
+      <Filter>소스 파일</Filter>
+    </FxCompile>
+    <FxCompile Include="PS_ProteanCloud2.hlsl">
+      <Filter>소스 파일</Filter>
+    </FxCompile>
+    <FxCompile Include="PS_FractalPyramid.hlsl">
       <Filter>소스 파일</Filter>
     </FxCompile>
   </ItemGroup>
