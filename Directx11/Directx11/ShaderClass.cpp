@@ -209,7 +209,11 @@ bool ShaderClass::InitializeShaderToyShader(ID3D11Device* _device, HWND _hwnd)
 
 	//새로운 텍스처 vertex shader와 pixel shader
 	// Compile the vertex shader code.
-	result = D3DCompileFromFile(vsFilename, NULL, NULL, "main", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
+	UINT compileFlags = 0;
+	compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+	//D3D10_SHADER_ENABLE_STRICTNESS
+
+	result = D3DCompileFromFile(vsFilename, NULL, NULL, "main", "vs_5_0", compileFlags, 0,
 		&vertexShaderBuffer, &errorMessage);
 	if (FAILED(result))
 	{
@@ -218,7 +222,7 @@ bool ShaderClass::InitializeShaderToyShader(ID3D11Device* _device, HWND _hwnd)
 	}
 
 	// Compile the pixel shader code.
-	result = D3DCompileFromFile(psFilename, NULL, NULL, "main", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
+	result = D3DCompileFromFile(psFilename, NULL, NULL, "main", "ps_5_0", compileFlags, 0,
 		&pixelShaderBuffer, &errorMessage);
 	if (FAILED(result))
 	{
@@ -345,7 +349,7 @@ bool ShaderClass::InitializeShaderToyTextureShader(ID3D11Device* _device, HWND _
 		textures[i].InitializeWIC(_device, _texFilenames[i]);
 	}
 
-	shaderType = ShaderType::ShaderToy;
+	shaderType = ShaderType::ShaderToyTexture;
 	hwnd = _hwnd;
 
 	const wchar_t* vsFilenamec = L"VS_ShaderToy.hlsl";
@@ -369,9 +373,13 @@ bool ShaderClass::InitializeShaderToyTextureShader(ID3D11Device* _device, HWND _
 	vertexShaderBuffer = 0;
 	pixelShaderBuffer = 0;
 
+	UINT compileFlags = 0;
+	compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+	//D3D10_SHADER_ENABLE_STRICTNESS
+
 	//새로운 텍스처 vertex shader와 pixel shader
 	// Compile the vertex shader code.
-	result = D3DCompileFromFile(vsFilename, NULL, NULL, "main", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
+	result = D3DCompileFromFile(vsFilename, NULL, NULL, "main", "vs_5_0", compileFlags, 0,
 		&vertexShaderBuffer, &errorMessage);
 	if (FAILED(result))
 	{
@@ -380,7 +388,7 @@ bool ShaderClass::InitializeShaderToyTextureShader(ID3D11Device* _device, HWND _
 	}
 
 	// Compile the pixel shader code.
-	result = D3DCompileFromFile(psFilename, NULL, NULL, "main", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
+	result = D3DCompileFromFile(psFilename, NULL, NULL, "main", "ps_5_0", compileFlags, 0,
 		&pixelShaderBuffer, &errorMessage);
 	if (FAILED(result))
 	{
@@ -445,6 +453,16 @@ bool ShaderClass::InitializeShaderToyTextureShader(ID3D11Device* _device, HWND _
 	pixelShaderBuffer->Release();
 	pixelShaderBuffer = 0;
 
+	// Setup the description of the dynamic matrix constant buffer that is in the vertex shader.
+	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
+	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	matrixBufferDesc.MiscFlags = 0;
+	matrixBufferDesc.StructureByteStride = 0;
+
+	// Create the constant buffer pointer so we can access the vertex shader constant buffer from within this class.
+	result = _device->CreateBuffer(&matrixBufferDesc, NULL, &m_matrixBuffer);
 
 	//Sampler State 명세는 여기서 셋업된다. 그리고 셰이더 파일로 넘어간다. Texture Sampler에서 가장 중요한 명세는 Filter다.
 	//Filter는 폴리곤의 면에 그려지는 최종 텍스처를 만들기 위해 조합되거나 사용되는 픽셀들을 결정한다.
@@ -527,9 +545,12 @@ bool ShaderClass::TEST_InitSToyOneTextureShader(ID3D11Device* _device, HWND _hwn
 	vertexShaderBuffer = 0;
 	pixelShaderBuffer = 0;
 
+	UINT compileFlags = 0;
+	compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+
 	//새로운 텍스처 vertex shader와 pixel shader
 	// Compile the vertex shader code.
-	result = D3DCompileFromFile(vsFilename, NULL, NULL, "main", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
+	result = D3DCompileFromFile(vsFilename, NULL, NULL, "main", "vs_5_0", compileFlags, 0,
 		&vertexShaderBuffer, &errorMessage);
 	if (FAILED(result))
 	{
@@ -538,7 +559,7 @@ bool ShaderClass::TEST_InitSToyOneTextureShader(ID3D11Device* _device, HWND _hwn
 	}
 
 	// Compile the pixel shader code.
-	result = D3DCompileFromFile(psFilename, NULL, NULL, "main", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
+	result = D3DCompileFromFile(psFilename, NULL, NULL, "main", "ps_5_0", compileFlags, 0,
 		&pixelShaderBuffer, &errorMessage);
 	if (FAILED(result))
 	{
@@ -869,8 +890,16 @@ bool ShaderClass::SetShaderToyTextureParameters(ID3D11DeviceContext* deviceConte
 
 bool ShaderClass::TEST_SetShaderToyTextureParameters(ID3D11DeviceContext* deviceContext, ID3D11ShaderResourceView* texture)
 {
+	cBufferData.iTime += 0.016f;
+	//std::cout << "iTime: " << cBufferData.iTime << std::endl;
+
+	D3D11_MAPPED_SUBRESOURCE ms;
+	//deviceContext->Map(buffer.Get(), NULL, D3D11_MAP_WRITE_DISCARD, NULL, &ms);
+	//memcpy(ms.pData, &cBufferData, sizeof(cBufferData));
+	//deviceContext->Unmap(buffer.Get(), NULL);
+
 	// Set shader texture resources in the pixel shader.
-	deviceContext->PSSetShaderResources(0, 1, &texture);
+	//deviceContext->PSSetShaderResources(0, 1, &texture);
 	return true;
 }
 

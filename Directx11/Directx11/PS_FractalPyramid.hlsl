@@ -14,7 +14,7 @@ struct PixelShaderInput
     float2 texcoord : TEXCOORD;
 };
 
-const float3 iResolution = float3(1280, 720, 0);
+const static float3 iResolution = float3(800, 600, 0);
 
 float3 palette(float d)
 {
@@ -67,10 +67,19 @@ float4 rm(float3 ro, float3 rd)
 
 float4 main(PixelShaderInput input) : SV_TARGET
 {
-    //return float4(1, 0, 0, 1);
     float2 fragCoord = input.texcoord * iResolution.xy;
-    //float2 uv = (fragCoord - (iResolution.xy / 2)) / iResolution.x;
-    float2 uv = input.texcoord - float2(0.5, 0.5);
+    //float2 uv = fragCoord / iResolution.xy - float2(0.5, 0.5);
+    
+    float2 uv = (fragCoord - (iResolution.xy / 2)) / iResolution.xy;
+    
+    //float2 uv = input.texcoord - float2(0.5, 0.5);
+    //float2 uv = input.texcoord;
+    
+    //float2 uv = coord / iResolution.xy;
+    //uv = uv * 2.0 - 1.0;
+    //uv.x *= iResolution.x / iResolution.y;
+    
+    
     float3 ro = float3(0., 0., -50.);
     ro.xz = rotate(ro.xz, iTime);
     float3 cf = normalize(-ro);

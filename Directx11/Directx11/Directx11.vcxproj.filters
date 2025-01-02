@@ -208,5 +208,8 @@
     <FxCompile Include="PS_FractalPyramid.hlsl">
       <Filter>소스 파일</Filter>
     </FxCompile>
+    <FxCompile Include="PS_SequenceStar.hlsl">
+      <Filter>소스 파일</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>
